@@ -740,10 +740,115 @@
     const ls = word.split('').map((ch,li) => {
       if(d.jmax === 0) return `<span style="display:inline-block">${ch}</span>`;
       const a = ja[(wi*3+li) % 4];
-      return `<span style="display:inline-block;animation:${a} ${r(d.jmin,d.jmax)}s ${r(0,0.6)}s ease-in-out infinite">${ch}</span>`;
+      const dur = r(d.jmin, d.jmax);
+      const del = r(0, 0.6);
+      return `<span class="jl" data-wi="${wi}" data-dur="${dur}" data-del="${del}" data-anim="${a}" style="display:inline-block;animation:${a} ${dur}s ${del}s ease-in-out infinite">${ch}</span>`;
     }).join('');
-    return `<span style="display:inline-block">${ls}</span>`;
+    return `<span class="jw" data-wi="${wi}" style="display:inline-block">${ls}</span>`;
   }).join(' ');
+})();
+</script>
+
+<!-- ═══ DEV MENU ══════════════════════════════════════════ -->
+<button id="dev-toggle" title="Dev menu" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#0a0a0a;border:1px solid rgba(212,180,131,0.3);color:rgba(212,180,131,0.5);font-size:11px;letter-spacing:1.5px;padding:6px 10px;cursor:pointer;font-family:monospace;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(212,180,131,0.8)';this.style.color='rgba(212,180,131,1)'" onmouseout="this.style.borderColor='rgba(212,180,131,0.3)';this.style.color='rgba(212,180,131,0.5)'">DEV</button>
+
+<div id="dev-panel" style="display:none;position:fixed;bottom:56px;right:20px;z-index:9998;background:#0c0c0c;border:1px solid rgba(212,180,131,0.2);padding:18px 20px;width:240px;font-family:'Crimson Pro',Georgia,serif;color:#c8c0b0">
+  <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,180,131,0.5);margin-bottom:14px">Title Effects</div>
+
+  <div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Amplitude</span><span id="amp-val" style="color:#D4B483">1.0×</span></div>
+    <input type="range" id="amp-slider" min="0.1" max="3" step="0.05" value="1" style="width:100%;accent-color:#D4B483">
+  </div>
+
+  <div style="margin-bottom:18px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Speed</span><span id="spd-val" style="color:#D4B483">1.0×</span></div>
+    <input type="range" id="spd-slider" min="0.2" max="3" step="0.05" value="1" style="width:100%;accent-color:#D4B483">
+  </div>
+
+  <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,180,131,0.4);margin-bottom:10px">Per Word</div>
+  <div id="word-toggles" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+
+  <button id="dev-reset" style="width:100%;padding:7px;background:transparent;border:1px solid rgba(212,180,131,0.2);color:rgba(212,180,131,0.5);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:monospace" onmouseover="this.style.borderColor='rgba(212,180,131,0.6)';this.style.color='rgba(212,180,131,0.8)'" onmouseout="this.style.borderColor='rgba(212,180,131,0.2)';this.style.color='rgba(212,180,131,0.5)'">Reset</button>
+</div>
+
+<script>
+(function(){
+  const baseAmp = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
+  const wordNames = ['Whisper','in','the','Halls'];
+  const wordDisabled = [false, false, false, false];
+
+  function dynStyle(){ return document.getElementById('jt-dyn') || (() => { const s=document.createElement('style'); s.id='jt-dyn'; document.head.appendChild(s); return s; })(); }
+
+  function setAmp(m) {
+    const s = dynStyle();
+    s.textContent = [
+      `@keyframes jt-a{0%,100%{transform:translate(0,0)}50%{transform:translate(${(baseAmp.a[0]*m).toFixed(3)}px,${(baseAmp.a[1]*m).toFixed(3)}px)}}`,
+      `@keyframes jt-b{0%,100%{transform:translate(0,0)}33%{transform:translate(${(baseAmp.b1[0]*m).toFixed(3)}px,${(baseAmp.b1[1]*m).toFixed(3)}px)}66%{transform:translate(${(baseAmp.b2[0]*m).toFixed(3)}px,${(baseAmp.b2[1]*m).toFixed(3)}px)}}`,
+      `@keyframes jt-c{0%,100%{transform:translate(0,0)}50%{transform:translate(${(baseAmp.c[0]*m).toFixed(3)}px,${(baseAmp.c[1]*m).toFixed(3)}px)}}`,
+      `@keyframes jt-d{0%,100%{transform:translate(0,0)}25%{transform:translate(${(baseAmp.d1[0]*m).toFixed(3)}px,${(baseAmp.d1[1]*m).toFixed(3)}px)}75%{transform:translate(${(baseAmp.d2[0]*m).toFixed(3)}px,${(baseAmp.d2[1]*m).toFixed(3)}px)}}`
+    ].join('');
+  }
+
+  function setSpeed(m) {
+    document.querySelectorAll('.jl').forEach(el => {
+      const base = parseFloat(el.dataset.dur);
+      const del  = el.dataset.del;
+      const anim = el.dataset.anim;
+      const wi   = parseInt(el.dataset.wi);
+      if(wordDisabled[wi]){ el.style.animation='none'; return; }
+      el.style.animation = `${anim} ${(base/m).toFixed(3)}s ${del}s ease-in-out infinite`;
+    });
+  }
+
+  function applyWordToggle(wi, enabled) {
+    wordDisabled[wi] = !enabled;
+    const spd = parseFloat(document.getElementById('spd-slider').value);
+    document.querySelectorAll(`.jl[data-wi="${wi}"]`).forEach(el => {
+      if(!enabled){ el.style.animation='none'; return; }
+      const base = parseFloat(el.dataset.dur);
+      el.style.animation = `${el.dataset.anim} ${(base/spd).toFixed(3)}s ${el.dataset.del}s ease-in-out infinite`;
+    });
+  }
+
+  // build word toggles
+  const toggleWrap = document.getElementById('word-toggles');
+  wordNames.forEach((name, wi) => {
+    const row = document.createElement('label');
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;font-size:13px;cursor:pointer';
+    row.innerHTML = `<span>${name}</span><input type="checkbox" checked data-wi="${wi}" style="accent-color:#D4B483;width:14px;height:14px;cursor:pointer">`;
+    row.querySelector('input').addEventListener('change', e => applyWordToggle(wi, e.target.checked));
+    toggleWrap.appendChild(row);
+  });
+
+  document.getElementById('amp-slider').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    document.getElementById('amp-val').textContent = v.toFixed(1) + '×';
+    setAmp(v);
+  });
+
+  document.getElementById('spd-slider').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    document.getElementById('spd-val').textContent = v.toFixed(1) + '×';
+    setSpeed(v);
+  });
+
+  document.getElementById('dev-reset').addEventListener('click', () => {
+    document.getElementById('amp-slider').value = 1;
+    document.getElementById('spd-slider').value = 1;
+    document.getElementById('amp-val').textContent = '1.0×';
+    document.getElementById('spd-val').textContent = '1.0×';
+    dynStyle().textContent = '';
+    wordDisabled.fill(false);
+    document.querySelectorAll('#word-toggles input').forEach(cb => cb.checked = true);
+    document.querySelectorAll('.jl').forEach(el => {
+      el.style.animation = `${el.dataset.anim} ${el.dataset.dur}s ${el.dataset.del}s ease-in-out infinite`;
+    });
+  });
+
+  document.getElementById('dev-toggle').addEventListener('click', () => {
+    const p = document.getElementById('dev-panel');
+    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  });
 })();
 </script>
 </body>
