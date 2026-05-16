@@ -127,8 +127,7 @@
       text-shadow:
         0 4px 8px rgba(0,0,0,0.95),
         0 8px 24px rgba(0,0,0,0.85),
-        0 16px 48px rgba(0,0,0,0.7),
-        0 0 80px rgba(212,180,131,0.22);
+        0 16px 48px rgba(0,0,0,0.7);
     }
 
     .hero-subtitle {
@@ -577,6 +576,32 @@
       border-top: 1px solid rgba(255,255,255,0.04);
     }
 
+    /* ─── TITLE HORROR EFFECTS ──────────────────────── */
+    @keyframes flicker-hi {
+      0%,100%{opacity:1}8%{opacity:.82}9%{opacity:1}37%{opacity:.88}38%{opacity:1}72%{opacity:.78}73%{opacity:.93}74%{opacity:1}
+    }
+    @keyframes flicker-mid {
+      0%,100%{opacity:1}22%{opacity:.87}23%{opacity:1}61%{opacity:.84}62%{opacity:1}
+    }
+    @keyframes flicker-lo {
+      0%,100%{opacity:1}45%{opacity:.92}46%{opacity:1}
+    }
+    @keyframes flicker-ghost {
+      0%,100%{opacity:1}80%{opacity:.96}81%{opacity:1}
+    }
+    @keyframes jt-a {
+      0%,100%{transform:translate(0,0)}50%{transform:translate(0.4px,-0.5px)}
+    }
+    @keyframes jt-b {
+      0%,100%{transform:translate(0,0)}33%{transform:translate(-0.4px,0.3px)}66%{transform:translate(0.3px,-0.3px)}
+    }
+    @keyframes jt-c {
+      0%,100%{transform:translate(0,0)}50%{transform:translate(-0.3px,0.5px)}
+    }
+    @keyframes jt-d {
+      0%,100%{transform:translate(0,0)}25%{transform:translate(0.2px,0.3px)}75%{transform:translate(-0.3px,-0.2px)}
+    }
+
     /* ─── UTILS ──────────────────────────────────────── */
     .section-header { margin-bottom: 0; }
   </style>
@@ -691,5 +716,35 @@
   © 2025 Whisper in the Halls &nbsp;·&nbsp; All rights reserved
 </footer>
 
+<script>
+(function(){
+  const title = document.querySelector('.hero-title');
+  if(!title) return;
+  const r = (a,b) => (Math.random()*(b-a)+a).toFixed(2);
+  const ja = ['jt-a','jt-b','jt-c','jt-d'];
+  // per-word: flicker anim, flicker duration, flicker delay, jitter min/max duration
+  // longer jitter duration = slower/gentler movement
+  // "Whisper" — medium jitter, strong flicker
+  // "in"      — nearly still, ghost flicker only
+  // "the"     — very slow barely-there jitter, soft flicker
+  // "Halls"   — most alive: fastest jitter, mid flicker
+  const wd = [
+    {jmin:1.1, jmax:1.9},
+    {jmin:0,   jmax:0  },
+    {jmin:2.8, jmax:5.0},
+    {jmin:0.7, jmax:1.4}
+  ];
+  const words = title.textContent.trim().split(' ');
+  title.innerHTML = words.map((word,wi) => {
+    const d = wd[wi] || wd[0];
+    const ls = word.split('').map((ch,li) => {
+      if(d.jmax === 0) return `<span style="display:inline-block">${ch}</span>`;
+      const a = ja[(wi*3+li) % 4];
+      return `<span style="display:inline-block;animation:${a} ${r(d.jmin,d.jmax)}s ${r(0,0.6)}s ease-in-out infinite">${ch}</span>`;
+    }).join('');
+    return `<span style="display:inline-block">${ls}</span>`;
+  }).join(' ');
+})();
+</script>
 </body>
 </html>
