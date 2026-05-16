@@ -1,16 +1,21 @@
 {
   "amp": 2.5,
   "spd": 0.8,
-  "glow": 0.90,
+  "glow": 0.9,
   "glowInv": true,
   "breatheOn": true,
-  "breatheSpeed": 4.0,
+  "breatheSpeed": 4,
   "breatheDepth": 0.5,
-  "wordDisabled": [false, false, false, false],
+  "wordDisabled": [
+    false,
+    false,
+    false,
+    false
+  ],
   "dustOn": true,
   "dustCount": 100,
-  "dustSpeed": 1.0,
-  "dustOpacity": 1.0,
-  "dustSize": 1.0,
-  "dustParallax": 1.0
+  "dustSpeed": 1,
+  "dustOpacity": 1,
+  "dustSize": 1.1,
+  "dustParallax": 1
 }

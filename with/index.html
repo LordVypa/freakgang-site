@@ -836,6 +836,7 @@
   </div>
 
   <button id="dev-reset" style="width:100%;padding:7px;background:transparent;border:1px solid rgba(212,180,131,0.2);color:rgba(212,180,131,0.5);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:monospace;margin-bottom:6px" onmouseover="this.style.borderColor='rgba(212,180,131,0.6)';this.style.color='rgba(212,180,131,0.8)'" onmouseout="this.style.borderColor='rgba(212,180,131,0.2)';this.style.color='rgba(212,180,131,0.5)'">Reset</button>
+  <button id="dev-load" style="display:none;width:100%;padding:7px;background:transparent;border:1px solid rgba(212,180,131,0.2);color:rgba(212,180,131,0.5);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:monospace;margin-bottom:6px" onmouseover="this.style.borderColor='rgba(212,180,131,0.6)';this.style.color='rgba(212,180,131,0.8)'" onmouseout="this.style.borderColor='rgba(212,180,131,0.2)';this.style.color='rgba(212,180,131,0.5)'">Load config.json</button>
   <button id="dev-save" style="width:100%;padding:7px;background:rgba(212,180,131,0.08);border:1px solid rgba(212,180,131,0.45);color:rgba(212,180,131,0.85);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:monospace" onmouseover="this.style.background='rgba(212,180,131,0.15)';this.style.borderColor='rgba(212,180,131,0.8)'" onmouseout="this.style.background='rgba(212,180,131,0.08)';this.style.borderColor='rgba(212,180,131,0.45)'">Save config.json</button>
 </div>
 
@@ -1100,8 +1101,14 @@
     };
   }
 
-  // load from config.json
-  fetch('config.json').then(r => r.json()).then(applyConfig).catch(() => applyConfig(DEFAULTS));
+  // merge obj into DEFAULTS so stale/partial configs always have all keys
+  function mergeWithDefaults(c) { return Object.assign({}, DEFAULTS, c, { wordDisabled: (c.wordDisabled || DEFAULTS.wordDisabled).slice() }); }
+
+  // initial load: fetch (http) → localStorage merged with DEFAULTS (file://) → DEFAULTS
+  fetch('config.json?t=' + Date.now(), {cache:'no-store'})
+    .then(r => r.json())
+    .then(c => { const merged = mergeWithDefaults(c); lsSet(merged); applyConfig(merged); })
+    .catch(() => { const ls = lsGet(); applyConfig(ls ? mergeWithDefaults(ls) : DEFAULTS); });
 
   // live controls
   document.getElementById('amp-slider').addEventListener('input', e => {
@@ -1159,18 +1166,127 @@
     applyConfig(DEFAULTS);
   });
 
-  document.getElementById('dev-save').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(getConfig(), null, 2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'config.json';
-    a.click();
+  // ── config file management (Chrome/Edge: FSA; Firefox: input+download) ──
+  const FSA = typeof window.showOpenFilePicker === 'function';
+  const IDB_KEY  = 'config-file-handle';
+  const JSON_OPTS = [{ description:'JSON', accept:{'application/json':['.json']} }];
+
+  // localStorage cache — keeps last-saved state, works everywhere
+  function lsGet() { try { return JSON.parse(localStorage.getItem('with-config')); } catch(e) { return null; } }
+  function lsSet(c) { try { localStorage.setItem('with-config', JSON.stringify(c)); } catch(e) {} }
+
+  // ── IndexedDB helpers (FSA only) ──
+  function idbGet(key) {
+    return new Promise((res, rej) => {
+      const req = indexedDB.open('with-dev', 1);
+      req.onupgradeneeded = e => e.target.result.createObjectStore('fh');
+      req.onsuccess = e => {
+        const r = e.target.result.transaction('fh','readonly').objectStore('fh').get(key);
+        r.onsuccess = () => res(r.result); r.onerror = rej;
+      };
+      req.onerror = rej;
+    });
+  }
+  function idbSet(key, val) {
+    return new Promise((res, rej) => {
+      const req = indexedDB.open('with-dev', 1);
+      req.onupgradeneeded = e => e.target.result.createObjectStore('fh');
+      req.onsuccess = e => {
+        const tx = e.target.result.transaction('fh','readwrite');
+        tx.objectStore('fh').put(val, key);
+        tx.oncomplete = res; tx.onerror = rej;
+      };
+      req.onerror = rej;
+    });
+  }
+
+  // ── FSA helpers ──
+  async function ensureRW(handle) {
+    const p = await handle.queryPermission({mode:'readwrite'});
+    if(p === 'granted') return true;
+    return (await handle.requestPermission({mode:'readwrite'})) === 'granted';
+  }
+  async function getOrLinkHandle() {
+    let handle = await idbGet(IDB_KEY);
+    if(!handle) {
+      const picks = await window.showOpenFilePicker({ types: JSON_OPTS, multiple: false });
+      handle = picks[0];
+      await idbSet(IDB_KEY, handle);
+    }
+    return handle;
+  }
+
+  function flashSaved() {
+    const btn = document.getElementById('dev-save');
+    btn.textContent = '✓ Saved';
+    setTimeout(() => { btn.textContent = 'Save config.json'; }, 1200);
+  }
+  function fallbackDownload(c) {
+    const blob = new Blob([JSON.stringify(c, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'config.json'; a.click();
+  }
+
+  // ── dev panel toggle ──
+  document.getElementById('dev-toggle').addEventListener('click', async () => {
+    const p = document.getElementById('dev-panel');
+    const opening = p.style.display === 'none';
+    p.style.display = opening ? 'block' : 'none';
+    if(!opening) return;
+
+    if(FSA) {
+      // Chrome/Edge: re-read from file on every open
+      try {
+        const handle = await getOrLinkHandle();
+        if(await ensureRW(handle)) {
+          const file = await handle.getFile();
+          const c = mergeWithDefaults(JSON.parse(await file.text()));
+          lsSet(c);
+          applyConfig(c);
+        }
+      } catch(e) {}
+    }
+    // Firefox: panel shows localStorage state (already in sync after saves)
   });
 
-  document.getElementById('dev-toggle').addEventListener('click', () => {
-    const p = document.getElementById('dev-panel');
-    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  // ── save button ──
+  document.getElementById('dev-save').addEventListener('click', async () => {
+    const c = getConfig();
+    lsSet(c); // always cache locally
+    if(FSA) {
+      try {
+        const handle = await getOrLinkHandle();
+        if(!(await ensureRW(handle))) return;
+        const w = await handle.createWritable();
+        await w.write(JSON.stringify(c, null, 2));
+        await w.close();
+        flashSaved();
+      } catch(e) {
+        if(e.name !== 'AbortError') { fallbackDownload(c); flashSaved(); }
+      }
+    } else {
+      fallbackDownload(c);
+      flashSaved();
+    }
   });
+
+  // ── Firefox: "Load config.json" button (hidden in Chrome) ──
+  if(!FSA) {
+    document.getElementById('dev-load').style.display = 'block';
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file'; fileInput.accept = '.json'; fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try { const c = mergeWithDefaults(JSON.parse(ev.target.result)); lsSet(c); applyConfig(c); } catch(er) {}
+      };
+      reader.readAsText(file);
+      fileInput.value = '';
+    });
+    document.getElementById('dev-load').addEventListener('click', () => fileInput.click());
+  }
 })();
 </script>
 </body>
