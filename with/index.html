@@ -590,16 +590,16 @@
       0%,100%{opacity:1}80%{opacity:.96}81%{opacity:1}
     }
     @keyframes jt-a {
-      0%,100%{transform:translate(0,0)}50%{transform:translate(0.4px,-0.5px)}
+      0%,100%{transform:translate(0,0)}50%{transform:translate(0.46px,-0.58px)}
     }
     @keyframes jt-b {
-      0%,100%{transform:translate(0,0)}33%{transform:translate(-0.4px,0.3px)}66%{transform:translate(0.3px,-0.3px)}
+      0%,100%{transform:translate(0,0)}33%{transform:translate(-0.46px,0.35px)}66%{transform:translate(0.35px,-0.35px)}
     }
     @keyframes jt-c {
-      0%,100%{transform:translate(0,0)}50%{transform:translate(-0.3px,0.5px)}
+      0%,100%{transform:translate(0,0)}50%{transform:translate(-0.35px,0.58px)}
     }
     @keyframes jt-d {
-      0%,100%{transform:translate(0,0)}25%{transform:translate(0.2px,0.3px)}75%{transform:translate(-0.3px,-0.2px)}
+      0%,100%{transform:translate(0,0)}25%{transform:translate(0.23px,0.35px)}75%{transform:translate(-0.35px,-0.23px)}
     }
 
     /* ─── UTILS ──────────────────────────────────────── */
@@ -729,10 +729,10 @@
   // "the"     — very slow barely-there jitter, soft flicker
   // "Halls"   — most alive: fastest jitter, mid flicker
   const wd = [
-    {jmin:1.1, jmax:1.9},
-    {jmin:0,   jmax:0  },
-    {jmin:2.8, jmax:5.0},
-    {jmin:0.7, jmax:1.4}
+    {jmin:0.96, jmax:1.65},
+    {jmin:0,    jmax:0   },
+    {jmin:2.43, jmax:4.35},
+    {jmin:0.61, jmax:1.22}
   ];
   const words = title.textContent.trim().split(' ');
   title.innerHTML = words.map((word,wi) => {
