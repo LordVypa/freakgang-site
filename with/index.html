@@ -827,20 +827,50 @@
     const row = document.createElement('label');
     row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;font-size:13px;cursor:pointer';
     row.innerHTML = `<span>${name}</span><input type="checkbox" checked data-wi="${wi}" style="accent-color:#D4B483;width:14px;height:14px;cursor:pointer">`;
-    row.querySelector('input').addEventListener('change', e => applyWordToggle(wi, e.target.checked));
+    row.querySelector('input').addEventListener('change', e => { applyWordToggle(wi, e.target.checked); saveState(); });
     toggleWrap.appendChild(row);
   });
+
+  loadState();
+
+  function saveState() {
+    localStorage.setItem('dev-amp', document.getElementById('amp-slider').value);
+    localStorage.setItem('dev-spd', document.getElementById('spd-slider').value);
+    localStorage.setItem('dev-words', JSON.stringify(wordDisabled));
+  }
+
+  function loadState() {
+    const amp = parseFloat(localStorage.getItem('dev-amp') || '1');
+    const spd = parseFloat(localStorage.getItem('dev-spd') || '1');
+    const dis = JSON.parse(localStorage.getItem('dev-words') || '[false,false,false,false]');
+
+    document.getElementById('amp-slider').value = amp;
+    document.getElementById('spd-slider').value = spd;
+    document.getElementById('amp-val').textContent = amp.toFixed(1) + '×';
+    document.getElementById('spd-val').textContent = spd.toFixed(1) + '×';
+
+    dis.forEach((disabled, wi) => {
+      wordDisabled[wi] = disabled;
+      const cb = document.querySelector(`#word-toggles input[data-wi="${wi}"]`);
+      if(cb) cb.checked = !disabled;
+    });
+
+    if(amp !== 1) setAmp(amp);
+    setSpeed(spd);
+  }
 
   document.getElementById('amp-slider').addEventListener('input', e => {
     const v = parseFloat(e.target.value);
     document.getElementById('amp-val').textContent = v.toFixed(1) + '×';
     setAmp(v);
+    saveState();
   });
 
   document.getElementById('spd-slider').addEventListener('input', e => {
     const v = parseFloat(e.target.value);
     document.getElementById('spd-val').textContent = v.toFixed(1) + '×';
     setSpeed(v);
+    saveState();
   });
 
   document.getElementById('dev-reset').addEventListener('click', () => {
@@ -854,6 +884,7 @@
     document.querySelectorAll('.jl').forEach(el => {
       el.style.animation = `${el.dataset.anim} ${el.dataset.dur}s ${el.dataset.del}s ease-in-out infinite`;
     });
+    saveState();
   });
 
   document.getElementById('dev-toggle').addEventListener('click', () => {
