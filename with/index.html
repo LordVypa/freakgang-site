@@ -614,6 +614,7 @@
   </style>
 </head>
 <body>
+<canvas id="dust-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5"></canvas>
 
 <!-- ═══ NAV ══════════════════════════════════════════════ -->
 <nav>
@@ -802,13 +803,157 @@
   <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,180,131,0.4);margin-bottom:10px">Per Word</div>
   <div id="word-toggles" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
 
+  <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,180,131,0.4);margin:4px 0 10px">Dust Motes</div>
+
+  <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;cursor:pointer;margin-bottom:12px">
+    <span>Enable dust</span>
+    <input type="checkbox" id="dust-on" checked style="accent-color:#D4B483;width:14px;height:14px;cursor:pointer">
+  </label>
+
+  <div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Count</span><span id="dust-count-val" style="color:#D4B483">100</span></div>
+    <input type="range" id="dust-count" min="10" max="300" step="10" value="100" style="width:100%;accent-color:#D4B483">
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Speed</span><span id="dust-speed-val" style="color:#D4B483">1.0×</span></div>
+    <input type="range" id="dust-speed" min="0.1" max="4" step="0.1" value="1" style="width:100%;accent-color:#D4B483">
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Opacity</span><span id="dust-opacity-val" style="color:#D4B483">1.00</span></div>
+    <input type="range" id="dust-opacity" min="0" max="2" step="0.05" value="1" style="width:100%;accent-color:#D4B483">
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Size</span><span id="dust-size-val" style="color:#D4B483">1.0×</span></div>
+    <input type="range" id="dust-size" min="0.2" max="3" step="0.1" value="1" style="width:100%;accent-color:#D4B483">
+  </div>
+
+  <div style="margin-bottom:18px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Parallax</span><span id="dust-parallax-val" style="color:#D4B483">1.0×</span></div>
+    <input type="range" id="dust-parallax" min="0" max="4" step="0.1" value="1" style="width:100%;accent-color:#D4B483">
+  </div>
+
   <button id="dev-reset" style="width:100%;padding:7px;background:transparent;border:1px solid rgba(212,180,131,0.2);color:rgba(212,180,131,0.5);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:monospace;margin-bottom:6px" onmouseover="this.style.borderColor='rgba(212,180,131,0.6)';this.style.color='rgba(212,180,131,0.8)'" onmouseout="this.style.borderColor='rgba(212,180,131,0.2)';this.style.color='rgba(212,180,131,0.5)'">Reset</button>
   <button id="dev-save" style="width:100%;padding:7px;background:rgba(212,180,131,0.08);border:1px solid rgba(212,180,131,0.45);color:rgba(212,180,131,0.85);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:monospace" onmouseover="this.style.background='rgba(212,180,131,0.15)';this.style.borderColor='rgba(212,180,131,0.8)'" onmouseout="this.style.background='rgba(212,180,131,0.08)';this.style.borderColor='rgba(212,180,131,0.45)'">Save config.json</button>
 </div>
 
 <script>
+/* ── DUST MOTES ─────────────────────────────────────────── */
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false] };
+  const canvas = document.getElementById('dust-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, mouse = { x: -9999, y: -9999 };
+
+  // live-tunable globals (dev menu writes these)
+  window.DUST = {
+    enabled:  true,
+    count:    100,   // total particles
+    speed:    1.0,   // speed multiplier
+    opacity:  1.0,   // opacity multiplier
+    size:     1.0,   // size multiplier
+    parallax: 1.0,   // parallax multiplier
+  };
+
+  // base layer definitions (ratios — scaled by DUST globals)
+  const BASE_LAYERS = [
+    { size:1.0, frac:0.40, speed:0.12, opacity:0.18, px:0.008 }, // far
+    { size:1.6, frac:0.35, speed:0.22, opacity:0.28, px:0.018 }, // mid
+    { size:2.4, frac:0.25, speed:0.38, opacity:0.40, px:0.032 }, // near
+  ];
+
+  let particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function spawn(layer, yOverride) {
+    const s = window.DUST.speed;
+    const angle = (Math.random() - 0.5) * 0.4;
+    return {
+      layer,
+      x:      Math.random() * W,
+      y:      yOverride !== undefined ? yOverride : Math.random() * H,
+      vx:     Math.sin(angle) * layer.speed * s * (0.6 + Math.random() * 0.8),
+      vy:    -layer.speed * s * (0.5 + Math.random() * 0.8),
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.004 + Math.random() * 0.006,
+      wobbleAmp:   0.18 + Math.random() * 0.28,
+      flicker:     Math.random() * Math.PI * 2,
+      flickerSpeed: 0.3 + Math.random() * 0.9,
+      flickerDepth: 0.3 + Math.random() * 0.5,
+      size:   layer.size * (0.75 + Math.random() * 0.5),
+      baseOp: layer.opacity * (0.6 + Math.random() * 0.4),
+    };
+  }
+
+  function init() {
+    resize();
+    particles = [];
+    const total = Math.round(window.DUST.count);
+    BASE_LAYERS.forEach(layer => {
+      const n = Math.round(total * layer.frac);
+      for(let i = 0; i < n; i++) particles.push(spawn(layer));
+    });
+  }
+
+  window.dustReinit = init; // called by dev controls that change count/speed
+
+  window.addEventListener('resize', init);
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    if(!window.DUST.enabled) { requestAnimationFrame(draw); return; }
+
+    particles.forEach((p, i) => {
+      p.wobble += p.wobbleSpeed;
+      const wx = Math.sin(p.wobble) * p.wobbleAmp;
+
+      const cx = W / 2, cy = H / 2;
+      const px = window.DUST.parallax;
+      const dx = (mouse.x - cx) * p.layer.px * px;
+      const dy = (mouse.y - cy) * p.layer.px * px;
+
+      p.x += p.vx + wx * 0.05;
+      p.y += p.vy;
+
+      if(p.y < -10) { particles[i] = spawn(p.layer, H + 5); return; }
+      if(p.x < -10) p.x = W + 5;
+      if(p.x > W + 10) p.x = -5;
+
+      const flick = (Math.sin(t * 0.001 * p.flickerSpeed + p.flicker) + 1) / 2;
+      const alpha = p.baseOp * window.DUST.opacity * (1 - p.flickerDepth + p.flickerDepth * flick);
+
+      const rx = p.x + dx + wx;
+      const ry = p.y + dy;
+      const r  = p.size * window.DUST.size * 2;
+
+      ctx.beginPath();
+      const grad = ctx.createRadialGradient(rx, ry, 0, rx, ry, r);
+      grad.addColorStop(0,   `rgba(212,180,131,${Math.min(alpha,1).toFixed(3)})`);
+      grad.addColorStop(0.5, `rgba(212,180,131,${Math.min(alpha*0.4,1).toFixed(3)})`);
+      grad.addColorStop(1,   `rgba(212,180,131,0)`);
+      ctx.fillStyle = grad;
+      ctx.arc(rx, ry, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  init();
+  requestAnimationFrame(draw);
+})();
+</script>
+
+<script>
+(function(){
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0 };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -911,6 +1056,29 @@
     breatheDepth  = parseFloat(C.breatheDepth);
     if(parseFloat(C.amp) !== 1) setAmp(parseFloat(C.amp));
     setSpeed(parseFloat(C.spd));
+    // dust
+    const dc = C.dustCount   ?? 100;
+    const ds = C.dustSpeed   ?? 1.0;
+    document.getElementById('dust-on').checked          = C.dustOn ?? true;
+    document.getElementById('dust-count').value         = dc;
+    document.getElementById('dust-speed').value         = ds;
+    document.getElementById('dust-opacity').value       = C.dustOpacity  ?? 1.0;
+    document.getElementById('dust-size').value          = C.dustSize     ?? 1.0;
+    document.getElementById('dust-parallax').value      = C.dustParallax ?? 1.0;
+    document.getElementById('dust-count-val').textContent   = dc;
+    document.getElementById('dust-speed-val').textContent   = parseFloat(ds).toFixed(1) + '×';
+    document.getElementById('dust-opacity-val').textContent = parseFloat(C.dustOpacity  ?? 1.0).toFixed(2);
+    document.getElementById('dust-size-val').textContent    = parseFloat(C.dustSize     ?? 1.0).toFixed(1) + '×';
+    document.getElementById('dust-parallax-val').textContent= parseFloat(C.dustParallax ?? 1.0).toFixed(1) + '×';
+    if(window.DUST) {
+      window.DUST.enabled  = C.dustOn ?? true;
+      window.DUST.count    = dc;
+      window.DUST.speed    = ds;
+      window.DUST.opacity  = C.dustOpacity  ?? 1.0;
+      window.DUST.size     = C.dustSize     ?? 1.0;
+      window.DUST.parallax = C.dustParallax ?? 1.0;
+      window.dustReinit && window.dustReinit();
+    }
   }
 
   function getConfig() {
@@ -922,7 +1090,13 @@
       breatheOn:    document.getElementById('breathe-on').checked,
       breatheSpeed: parseFloat(document.getElementById('bspd-slider').value),
       breatheDepth: parseFloat(document.getElementById('bdep-slider').value),
-      wordDisabled: wordDisabled.slice()
+      wordDisabled: wordDisabled.slice(),
+      dustOn:       document.getElementById('dust-on').checked,
+      dustCount:    parseFloat(document.getElementById('dust-count').value),
+      dustSpeed:    parseFloat(document.getElementById('dust-speed').value),
+      dustOpacity:  parseFloat(document.getElementById('dust-opacity').value),
+      dustSize:     parseFloat(document.getElementById('dust-size').value),
+      dustParallax: parseFloat(document.getElementById('dust-parallax').value),
     };
   }
 
@@ -951,6 +1125,33 @@
   document.getElementById('bdep-slider').addEventListener('input',  e => {
     document.getElementById('bdep-val').textContent = parseFloat(e.target.value).toFixed(2);
     breatheDepth = parseFloat(e.target.value);
+  });
+
+  // dust controls
+  document.getElementById('dust-on').addEventListener('change', e => {
+    window.DUST.enabled = e.target.checked;
+  });
+  document.getElementById('dust-count').addEventListener('input', e => {
+    document.getElementById('dust-count-val').textContent = e.target.value;
+    window.DUST.count = parseFloat(e.target.value);
+    window.dustReinit && window.dustReinit();
+  });
+  document.getElementById('dust-speed').addEventListener('input', e => {
+    document.getElementById('dust-speed-val').textContent = parseFloat(e.target.value).toFixed(1) + '×';
+    window.DUST.speed = parseFloat(e.target.value);
+    window.dustReinit && window.dustReinit();
+  });
+  document.getElementById('dust-opacity').addEventListener('input', e => {
+    document.getElementById('dust-opacity-val').textContent = parseFloat(e.target.value).toFixed(2);
+    window.DUST.opacity = parseFloat(e.target.value);
+  });
+  document.getElementById('dust-size').addEventListener('input', e => {
+    document.getElementById('dust-size-val').textContent = parseFloat(e.target.value).toFixed(1) + '×';
+    window.DUST.size = parseFloat(e.target.value);
+  });
+  document.getElementById('dust-parallax').addEventListener('input', e => {
+    document.getElementById('dust-parallax-val').textContent = parseFloat(e.target.value).toFixed(1) + '×';
+    window.DUST.parallax = parseFloat(e.target.value);
   });
 
   document.getElementById('dev-reset').addEventListener('click', () => {

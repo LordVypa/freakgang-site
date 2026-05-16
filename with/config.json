@@ -6,5 +6,11 @@
   "breatheOn": true,
   "breatheSpeed": 4.0,
   "breatheDepth": 0.5,
-  "wordDisabled": [false, false, false, false]
+  "wordDisabled": [false, false, false, false],
+  "dustOn": true,
+  "dustCount": 100,
+  "dustSpeed": 1.0,
+  "dustOpacity": 1.0,
+  "dustSize": 1.0,
+  "dustParallax": 1.0
 }
