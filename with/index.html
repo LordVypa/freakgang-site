@@ -609,6 +609,17 @@
     .jw:hover { transform: translateY(6px); }
     .jw:hover .jl { animation-play-state: paused !important; }
 
+    /* ─── SCRATCH OVERLAY ────────────────────────────── */
+    .hero-title-wrap { position: relative; display: inline-block; }
+    .scratch-overlay {
+      position: absolute;
+      inset: -10% -5%;
+      pointer-events: none;
+      background-size: 256px 256px;
+      mix-blend-mode: screen;
+      opacity: 0;
+    }
+
     /* ─── UTILS ──────────────────────────────────────── */
     .section-header { margin-bottom: 0; }
   </style>
@@ -643,7 +654,10 @@
   <div class="hero-vignette"></div>
 
   <div class="hero-content">
-    <h1 class="hero-title">Whisper in the Halls</h1>
+    <div class="hero-title-wrap">
+      <h1 class="hero-title">Whisper in the Halls</h1>
+      <div class="scratch-overlay" aria-hidden="true"></div>
+    </div>
     <p class="hero-desc">
       An atmospheric, <em>first person institutional-horror</em> game set in the remains of a defunct orphanage —
       taking you through its deceptive past and bone-chilling revelations.
@@ -758,6 +772,41 @@
 })();
 </script>
 
+<script>
+/* ── SCRATCH TEXTURE ─────────────────────────────────────── */
+(function(){
+  function buildScratchTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, 256, 256); // transparent bg — screen blend makes dark areas invisible
+    function rng(s){ const x = Math.sin(s) * 43758.5453; return x - Math.floor(x); }
+    for(let i = 0; i < 60; i++){
+      const x1 = rng(i*7.13) * 300 - 22;
+      const y1 = rng(i*13.7) * 300 - 22;
+      const len = 12 + rng(i*3.71) * 100;
+      const angle = -0.85 + rng(i*5.91) * 0.45; // mostly diagonal, slight variance
+      const x2 = x1 + Math.cos(angle) * len;
+      const y2 = y1 + Math.sin(angle) * len;
+      ctx.save();
+      ctx.globalAlpha = 0.30 + rng(i*17.3) * 0.55;
+      ctx.strokeStyle = `rgba(255,240,190,1)`;
+      ctx.lineWidth = 0.3 + rng(i*11.1) * 0.8;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.restore();
+    }
+    return c.toDataURL();
+  }
+
+  const overlay = document.querySelector('.scratch-overlay');
+  if(overlay) overlay.style.backgroundImage = `url(${buildScratchTexture()})`;
+
+  window.applyScratch = function(edge, tex) {
+    if(overlay) overlay.style.opacity = tex;
+  };
+})();
+</script>
+
 <!-- ═══ DEV MENU ══════════════════════════════════════════ -->
 <style>
 #dev-panel { display:none;position:fixed;bottom:56px;right:20px;z-index:9998;width:260px;background:#0c0b0a;border:1px solid rgba(212,180,131,0.18);font-family:'Crimson Pro',Georgia,serif;color:#c8c0b0;box-shadow:0 8px 40px rgba(0,0,0,0.8); }
@@ -815,6 +864,10 @@
 
     <div class="dev-section">Per Word</div>
     <div id="word-toggles" style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px"></div>
+
+    <div class="dev-section">Scratch</div>
+    <div class="dev-row"><span>Grain opacity</span><span id="scratch-tex-val">0.25</span></div>
+    <input class="dev-slider" type="range" id="scratch-tex" min="0" max="1" step="0.05" value="0.25">
   </div>
 
   <!-- ── DUST TAB ── -->
@@ -1143,7 +1196,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25 };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1302,6 +1355,11 @@ void main(){
     document.getElementById('fog-warp-val').textContent   = parseFloat(C.fogWarp   ?? 1.8).toFixed(1);
     document.getElementById('fog-flowx-val').textContent  = parseFloat(C.fogFlowX  ?? 1.0).toFixed(1);
     document.getElementById('fog-flowy-val').textContent  = parseFloat(C.fogFlowY  ?? 0.0).toFixed(1);
+    // scratch
+    const st = C.scratchTex ?? 0.25;
+    document.getElementById('scratch-tex').value            = st;
+    document.getElementById('scratch-tex-val').textContent  = parseFloat(st).toFixed(2);
+    window.applyScratch && window.applyScratch(null, st);
   }
 
   function getConfig() {
@@ -1331,6 +1389,7 @@ void main(){
       fogFlowY:     parseFloat(document.getElementById('fog-flowy').value),
       fogOctaves:   parseFloat(document.getElementById('fog-oct').value),
       fogThrottle:  document.getElementById('fog-throttle').checked,
+      scratchTex:   parseFloat(document.getElementById('scratch-tex').value),
     };
   }
 
@@ -1429,6 +1488,12 @@ void main(){
   document.getElementById('fog-flowy').addEventListener('input', e => {
     document.getElementById('fog-flowy-val').textContent = parseFloat(e.target.value).toFixed(1);
     window.FOG.flowY = parseFloat(e.target.value);
+  });
+
+  // scratch controls
+  document.getElementById('scratch-tex').addEventListener('input', e => {
+    document.getElementById('scratch-tex-val').textContent = parseFloat(e.target.value).toFixed(2);
+    window.applyScratch && window.applyScratch(null, parseFloat(e.target.value));
   });
 
   document.getElementById('dev-reset').addEventListener('click', () => {
