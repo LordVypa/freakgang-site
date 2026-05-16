@@ -604,22 +604,10 @@
     }
 
     /* ─── TITLE WORD FREEZE ─────────────────────────── */
-    .jw { cursor: default; transition: transform 0.3s ease, text-shadow 0.3s ease; }
+    .jw { cursor: default; transition: transform 0.3s ease; }
     .jw .jl { transition: color 0.15s ease; }
-
-    /* glow on hover (default) */
-    .jw:hover {
-      transform: translateY(6px);
-      text-shadow: 0 14px 22px rgba(0,0,0,0.95), 0 6px 10px rgba(0,0,0,0.9), var(--hover-glow);
-    }
+    .jw:hover { transform: translateY(6px); }
     .jw:hover .jl { animation-play-state: paused !important; }
-
-    /* inverted: glow always, extinguished on hover */
-    .glow-always .jw { text-shadow: var(--hover-glow); }
-    .glow-always .jw:hover {
-      transform: translateY(6px);
-      text-shadow: 0 14px 22px rgba(0,0,0,0.95), 0 6px 10px rgba(0,0,0,0.9);
-    }
 
     /* ─── UTILS ──────────────────────────────────────── */
     .section-header { margin-bottom: 0; }
@@ -794,6 +782,23 @@
     <input type="checkbox" id="glow-invert" style="accent-color:#D4B483;width:14px;height:14px;cursor:pointer">
   </label>
 
+  <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,180,131,0.4);margin:4px 0 10px">Breathe</div>
+
+  <label style="display:flex;align-items:center;justify-content:space-between;font-size:13px;cursor:pointer;margin-bottom:12px">
+    <span>Enable breathe</span>
+    <input type="checkbox" id="breathe-on" checked style="accent-color:#D4B483;width:14px;height:14px;cursor:pointer">
+  </label>
+
+  <div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Breathe speed</span><span id="bspd-val" style="color:#D4B483">1.0×</span></div>
+    <input type="range" id="bspd-slider" min="0.1" max="4" step="0.05" value="1" style="width:100%;accent-color:#D4B483">
+  </div>
+
+  <div style="margin-bottom:18px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>Breathe depth</span><span id="bdep-val" style="color:#D4B483">0.60</span></div>
+    <input type="range" id="bdep-slider" min="0" max="1" step="0.05" value="0.6" style="width:100%;accent-color:#D4B483">
+  </div>
+
   <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,180,131,0.4);margin-bottom:10px">Per Word</div>
   <div id="word-toggles" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
 
@@ -849,39 +854,82 @@
     toggleWrap.appendChild(row);
   });
 
-  loadState();
+  // ── Breathe engine ───────────────────────────────────
+  const wordEls    = Array.from(document.querySelectorAll('.jw'));
+  const wPhase     = wordEls.map(() => Math.random() * Math.PI * 2);
+  const wSpeedMult = wordEls.map(() => 0.65 + Math.random() * 0.7);
+  const hovered    = new Set();
+  wordEls.forEach((el, wi) => {
+    el.addEventListener('mouseenter', () => hovered.add(wi));
+    el.addEventListener('mouseleave', () => hovered.delete(wi));
+  });
 
-  function setGlow(v) {
-    const shadow = v > 0 ? `0 0 ${Math.round(14 + v * 20)}px rgba(212,180,131,${v.toFixed(2)})` : 'none';
-    document.documentElement.style.setProperty('--hover-glow', shadow);
+  let glowIntensity = 0.35;
+  let glowAlways    = false;
+  let breatheOn     = true;
+  let breatheSpeed  = 1.0;
+  let breatheDepth  = 0.6;
+  const dropShadow  = '0 14px 22px rgba(0,0,0,0.95),0 6px 10px rgba(0,0,0,0.9)';
+
+  function glowShadow(v) {
+    return v > 0 ? `0 0 ${Math.round(14 + v * 20)}px rgba(212,180,131,${v.toFixed(3)})` : '';
   }
 
-  function setGlowInvert(on) {
-    document.querySelector('.hero-title').classList.toggle('glow-always', on);
+  function breatheTick(t) {
+    wordEls.forEach((el, wi) => {
+      const isHov = hovered.has(wi);
+      let gv = glowIntensity;
+      if(breatheOn) {
+        const sine = (Math.sin(t * 0.001 * breatheSpeed * wSpeedMult[wi] + wPhase[wi]) + 1) / 2;
+        gv = glowIntensity * (1 - breatheDepth + breatheDepth * sine);
+      }
+      const gs = glowShadow(gv);
+      if(glowAlways) {
+        el.style.textShadow = isHov ? dropShadow : gs;
+      } else {
+        el.style.textShadow = isHov ? (gs ? `${dropShadow},${gs}` : dropShadow) : '';
+      }
+    });
+    requestAnimationFrame(breatheTick);
   }
+  requestAnimationFrame(breatheTick);
+
+  function setGlow(v)        { glowIntensity = v; }
+  function setGlowInvert(on) { glowAlways = on; }
 
   function saveState() {
-    localStorage.setItem('dev-amp',        document.getElementById('amp-slider').value);
-    localStorage.setItem('dev-spd',        document.getElementById('spd-slider').value);
-    localStorage.setItem('dev-glow',       document.getElementById('glow-slider').value);
-    localStorage.setItem('dev-glow-inv',   document.getElementById('glow-invert').checked ? '1' : '0');
-    localStorage.setItem('dev-words',      JSON.stringify(wordDisabled));
+    localStorage.setItem('dev-amp',      document.getElementById('amp-slider').value);
+    localStorage.setItem('dev-spd',      document.getElementById('spd-slider').value);
+    localStorage.setItem('dev-glow',     document.getElementById('glow-slider').value);
+    localStorage.setItem('dev-glow-inv', document.getElementById('glow-invert').checked ? '1' : '0');
+    localStorage.setItem('dev-breathe',  document.getElementById('breathe-on').checked  ? '1' : '0');
+    localStorage.setItem('dev-bspd',     document.getElementById('bspd-slider').value);
+    localStorage.setItem('dev-bdep',     document.getElementById('bdep-slider').value);
+    localStorage.setItem('dev-words',    JSON.stringify(wordDisabled));
   }
 
   function loadState() {
-    const amp     = parseFloat(localStorage.getItem('dev-amp')  || '1');
-    const spd     = parseFloat(localStorage.getItem('dev-spd')  || '1');
-    const glow    = parseFloat(localStorage.getItem('dev-glow') || '0.35');
+    const amp     = parseFloat(localStorage.getItem('dev-amp')     || '1');
+    const spd     = parseFloat(localStorage.getItem('dev-spd')     || '1');
+    const glow    = parseFloat(localStorage.getItem('dev-glow')    || '0.35');
     const glowInv = localStorage.getItem('dev-glow-inv') === '1';
-    const dis     = JSON.parse(localStorage.getItem('dev-words') || '[false,false,false,false]');
+    const brOn    = localStorage.getItem('dev-breathe') !== '0';
+    const bspd    = parseFloat(localStorage.getItem('dev-bspd')    || '1');
+    const bdep    = parseFloat(localStorage.getItem('dev-bdep')    || '0.6');
+    const dis     = JSON.parse(localStorage.getItem('dev-words')   || '[false,false,false,false]');
 
-    document.getElementById('amp-slider').value  = amp;
-    document.getElementById('spd-slider').value  = spd;
-    document.getElementById('glow-slider').value = glow;
+    document.getElementById('amp-slider').value    = amp;
+    document.getElementById('spd-slider').value    = spd;
+    document.getElementById('glow-slider').value   = glow;
     document.getElementById('glow-invert').checked = glowInv;
+    document.getElementById('breathe-on').checked  = brOn;
+    document.getElementById('bspd-slider').value   = bspd;
+    document.getElementById('bdep-slider').value   = bdep;
     document.getElementById('amp-val').textContent  = amp.toFixed(1)  + '×';
     document.getElementById('spd-val').textContent  = spd.toFixed(1)  + '×';
     document.getElementById('glow-val').textContent = glow.toFixed(2);
+    document.getElementById('bspd-val').textContent = bspd.toFixed(1) + '×';
+    document.getElementById('bdep-val').textContent = bdep.toFixed(2);
 
     dis.forEach((disabled, wi) => {
       wordDisabled[wi] = disabled;
@@ -889,6 +937,9 @@
       if(cb) cb.checked = !disabled;
     });
 
+    breatheOn    = brOn;
+    breatheSpeed = bspd;
+    breatheDepth = bdep;
     if(amp !== 1) setAmp(amp);
     setSpeed(spd);
     setGlow(glow);
@@ -921,15 +972,35 @@
     saveState();
   });
 
+  document.getElementById('breathe-on').addEventListener('change', e => {
+    breatheOn = e.target.checked; saveState();
+  });
+  document.getElementById('bspd-slider').addEventListener('input', e => {
+    breatheSpeed = parseFloat(e.target.value);
+    document.getElementById('bspd-val').textContent = breatheSpeed.toFixed(1) + '×';
+    saveState();
+  });
+  document.getElementById('bdep-slider').addEventListener('input', e => {
+    breatheDepth = parseFloat(e.target.value);
+    document.getElementById('bdep-val').textContent = breatheDepth.toFixed(2);
+    saveState();
+  });
+
   document.getElementById('dev-reset').addEventListener('click', () => {
     document.getElementById('amp-slider').value  = 1;
     document.getElementById('spd-slider').value  = 1;
     document.getElementById('glow-slider').value    = 0.35;
     document.getElementById('glow-invert').checked  = false;
+    document.getElementById('breathe-on').checked   = true;
+    document.getElementById('bspd-slider').value    = 1;
+    document.getElementById('bdep-slider').value    = 0.6;
     document.getElementById('amp-val').textContent  = '1.0×';
     document.getElementById('spd-val').textContent  = '1.0×';
     document.getElementById('glow-val').textContent = '0.35';
+    document.getElementById('bspd-val').textContent = '1.0×';
+    document.getElementById('bdep-val').textContent = '0.60';
     dynStyle().textContent = '';
+    breatheOn = true; breatheSpeed = 1; breatheDepth = 0.6;
     setGlow(0.35);
     setGlowInvert(false);
     wordDisabled.fill(false);
@@ -939,6 +1010,8 @@
     });
     saveState();
   });
+
+  loadState();
 
   document.getElementById('dev-toggle').addEventListener('click', () => {
     const p = document.getElementById('dev-panel');
