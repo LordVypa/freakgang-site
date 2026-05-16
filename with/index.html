@@ -602,6 +602,17 @@
       0%,100%{transform:translate(0,0)}25%{transform:translate(0.23px,0.35px)}75%{transform:translate(-0.35px,-0.23px)}
     }
 
+    /* ─── TITLE WORD FREEZE ─────────────────────────── */
+    .jw { cursor: default; transition: transform 0.3s ease, text-shadow 0.3s ease; }
+    .jw .jl { transition: color 0.15s ease; }
+    .jw:hover {
+      transform: translateY(6px);
+      text-shadow: 0 14px 22px rgba(0,0,0,0.95), 0 6px 10px rgba(0,0,0,0.9);
+    }
+    .jw:hover .jl {
+      animation-play-state: paused !important;
+    }
+
     /* ─── UTILS ──────────────────────────────────────── */
     .section-header { margin-bottom: 0; }
   </style>
