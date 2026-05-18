@@ -609,6 +609,20 @@
     .jw:hover { transform: translateY(6px); }
     .jw:hover .jl { animation-play-state: paused !important; }
 
+    /* ─── WHISPERS ───────────────────────────────────── */
+    .whisper {
+      position: absolute;
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-style: italic;
+      color: var(--gold);
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      z-index: 6;
+      opacity: 0;
+      letter-spacing: 0.5px;
+    }
+
     /* ─── SCRATCH OVERLAY ────────────────────────────── */
     .hero-title-wrap { position: relative; display: inline-block; }
     .scratch-overlay {
@@ -830,6 +844,12 @@
 .dev-btn:hover { border-color:rgba(212,180,131,0.7);color:rgba(212,180,131,0.9); }
 .dev-btn.primary { background:rgba(212,180,131,0.08);border-color:rgba(212,180,131,0.4);color:rgba(212,180,131,0.85); }
 .dev-btn.primary:hover { background:rgba(212,180,131,0.16);border-color:rgba(212,180,131,0.8); }
+.dev-minmax { display:flex;gap:5px;margin:3px 0 1px }
+.dev-minmax input { flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(212,180,131,0.18);color:#c8c0b0;font-family:monospace;font-size:11px;padding:4px 3px;text-align:center;width:0;-moz-appearance:textfield;border-radius:2px }
+.dev-minmax input:focus { outline:none;border-color:rgba(212,180,131,0.5) }
+.dev-minmax input::-webkit-inner-spin-button,.dev-minmax input::-webkit-outer-spin-button { -webkit-appearance:none }
+.dev-minmax-label { display:flex;gap:5px;margin-bottom:9px;font-size:9px;color:rgba(212,180,131,0.3);letter-spacing:1px;text-transform:uppercase }
+.dev-minmax-label span { flex:1;text-align:center }
 </style>
 
 <button id="dev-toggle" title="Dev menu" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#0a0a0a;border:1px solid rgba(212,180,131,0.3);color:rgba(212,180,131,0.5);font-size:11px;letter-spacing:1.5px;padding:6px 10px;cursor:pointer;font-family:monospace;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(212,180,131,0.8)';this.style.color='rgba(212,180,131,1)'" onmouseout="this.style.borderColor='rgba(212,180,131,0.3)';this.style.color='rgba(212,180,131,0.5)'">DEV</button>
@@ -840,6 +860,7 @@
     <button class="dev-tab active" data-tab="title">Title</button>
     <button class="dev-tab"        data-tab="dust">Dust</button>
     <button class="dev-tab"        data-tab="fog">Fog</button>
+    <button class="dev-tab"        data-tab="whisp">Whisp</button>
   </div>
 
   <!-- ── TITLE TAB ── -->
@@ -911,6 +932,76 @@
 
     <div class="dev-section">Color</div>
     <input type="color" id="fog-color" value="#1a0f04" style="width:100%;height:32px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px;margin-bottom:12px">
+  </div>
+
+  <!-- ── WHISP TAB ── -->
+  <div class="dev-pane" id="tab-whisp">
+    <label class="dev-check"><span>Enable</span><input type="checkbox" id="whisp-on" checked></label>
+    <div class="dev-row" style="margin-top:4px"><span>Pool size</span><span id="whisp-pool-val">8</span></div>
+    <input class="dev-slider" type="range" id="whisp-pool" min="1" max="20" step="1" value="8">
+
+    <div class="dev-section">Gap between cycles (s)</div>
+    <div class="dev-minmax">
+      <input type="number" id="whisp-gap-min" value="0.3" min="0" max="30" step="0.1">
+      <input type="number" id="whisp-gap-max" value="1.5" min="0" max="30" step="0.1">
+    </div>
+    <div class="dev-minmax-label"><span>min</span><span>max</span></div>
+
+    <div class="dev-section">Ghost</div>
+    <div class="dev-row">Opacity</div>
+    <div class="dev-minmax">
+      <input type="number" id="whisp-gop-min" value="0.10" min="0" max="1" step="0.01">
+      <input type="number" id="whisp-gop-max" value="0.35" min="0" max="1" step="0.01">
+    </div>
+    <div class="dev-minmax-label"><span>min</span><span>max</span></div>
+    <div class="dev-row">Hold (s)</div>
+    <div class="dev-minmax">
+      <input type="number" id="whisp-ghold-min" value="3" min="0.5" max="30" step="0.5">
+      <input type="number" id="whisp-ghold-max" value="8" min="0.5" max="30" step="0.5">
+    </div>
+    <div class="dev-minmax-label"><span>min</span><span>max</span></div>
+    <div class="dev-row">Size (px)</div>
+    <div class="dev-minmax">
+      <input type="number" id="whisp-gsz-min" value="12" min="6" max="80" step="1">
+      <input type="number" id="whisp-gsz-max" value="20" min="6" max="80" step="1">
+    </div>
+    <div class="dev-minmax-label"><span>min</span><span>max</span></div>
+
+    <div class="dev-section">Flash</div>
+    <div class="dev-row">Opacity</div>
+    <div class="dev-minmax">
+      <input type="number" id="whisp-fop-min" value="0.45" min="0" max="1" step="0.01">
+      <input type="number" id="whisp-fop-max" value="0.75" min="0" max="1" step="0.01">
+    </div>
+    <div class="dev-minmax-label"><span>min</span><span>max</span></div>
+    <div class="dev-row">Hold (s)</div>
+    <div class="dev-minmax">
+      <input type="number" id="whisp-fhold-min" value="0.5" min="0.1" max="10" step="0.1">
+      <input type="number" id="whisp-fhold-max" value="2.0" min="0.1" max="10" step="0.1">
+    </div>
+    <div class="dev-minmax-label"><span>min</span><span>max</span></div>
+    <div class="dev-row">Size (px)</div>
+    <div class="dev-minmax">
+      <input type="number" id="whisp-fsz-min" value="16" min="6" max="80" step="1">
+      <input type="number" id="whisp-fsz-max" value="28" min="6" max="80" step="1">
+    </div>
+    <div class="dev-minmax-label"><span>min</span><span>max</span></div>
+
+    <div class="dev-section">Placement</div>
+    <div class="dev-row">Rotation (deg)</div>
+    <div class="dev-minmax">
+      <input type="number" id="whisp-rot-min" value="-6" min="-45" max="0"  step="1">
+      <input type="number" id="whisp-rot-max" value="6"  min="0"  max="45" step="1">
+    </div>
+    <div class="dev-minmax-label"><span>min</span><span>max</span></div>
+    <div class="dev-row"><span>Edge margin (px)</span><span id="whisp-pad-val">48</span></div>
+    <input class="dev-slider" type="range" id="whisp-pad" min="0" max="160" step="4" value="48">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:6px;font-size:12px">
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-left"   checked style="accent-color:#D4B483"> Left</label>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-right"  checked style="accent-color:#D4B483"> Right</label>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-top"    checked style="accent-color:#D4B483"> Top</label>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-bottom" checked style="accent-color:#D4B483"> Bottom</label>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -985,8 +1076,9 @@ float fbm(vec2 p){
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res;
   float h = clamp(u_height + u_scroll*0.20, 0.0, 0.98);
-  float vertMask = 1.0 - smoothstep(h*0.45, h, uv.y);
-  if(vertMask < 0.001){ gl_FragColor=vec4(0); return; }
+
+  /* skip pixels well above the fog zone — cheap early out */
+  if(uv.y > h * 1.6){ gl_FragColor=vec4(0); return; }
 
   float t = u_time*0.001*u_speed;
   vec2 p = uv * vec2(u_scale, u_scale*0.5);
@@ -997,6 +1089,10 @@ void main(){
   float f = fbm(p + u_warp*q + t*flow*0.28);
   f = clamp(f*0.5+0.5, 0.0, 1.0);
   f = pow(f, 1.35);
+
+  /* noise-modulated top edge: dense wisps reach higher, sparse areas stay low */
+  float topEdge = h * (0.65 + f * 0.55);
+  float vertMask = 1.0 - smoothstep(topEdge * 0.45, topEdge, uv.y);
 
   float alpha = f * vertMask * u_opacity * 2.4;
   alpha = clamp(alpha, 0.0, 1.0);
@@ -1196,7 +1292,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25 };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, whispOn:true, whispPoolSize:8, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1355,6 +1451,38 @@ void main(){
     document.getElementById('fog-warp-val').textContent   = parseFloat(C.fogWarp   ?? 1.8).toFixed(1);
     document.getElementById('fog-flowx-val').textContent  = parseFloat(C.fogFlowX  ?? 1.0).toFixed(1);
     document.getElementById('fog-flowy-val').textContent  = parseFloat(C.fogFlowY  ?? 0.0).toFixed(1);
+    // whispers
+    const we = (C.whispEdges || DEFAULTS.whispEdges);
+    function wv(id, val){ document.getElementById(id).value = val; }
+    function wc(id, val){ document.getElementById(id).checked = val; }
+    function wt(id, val){ document.getElementById(id).textContent = val; }
+    wc('whisp-on',         C.whispOn       ?? true);
+    wv('whisp-pool',       C.whispPoolSize ?? 8);  wt('whisp-pool-val', C.whispPoolSize ?? 8);
+    wv('whisp-gap-min',    C.whispGapMin   ?? 0.3);wv('whisp-gap-max',    C.whispGapMax   ?? 1.5);
+    wv('whisp-gop-min',    C.whispGOpMin  ?? 0.10);wv('whisp-gop-max',    C.whispGOpMax    ?? 0.35);
+    wv('whisp-ghold-min',  C.whispGHoldMin?? 3);   wv('whisp-ghold-max',  C.whispGHoldMax  ?? 8);
+    wv('whisp-gsz-min',    C.whispGSzMin  ?? 12);  wv('whisp-gsz-max',    C.whispGSzMax    ?? 20);
+    wv('whisp-fop-min',    C.whispFOpMin  ?? 0.45);wv('whisp-fop-max',    C.whispFOpMax    ?? 0.75);
+    wv('whisp-fhold-min',  C.whispFHoldMin?? 0.5); wv('whisp-fhold-max',  C.whispFHoldMax  ?? 2.0);
+    wv('whisp-fsz-min',    C.whispFSzMin  ?? 16);  wv('whisp-fsz-max',    C.whispFSzMax    ?? 28);
+    wv('whisp-rot-min',    C.whispRotMin  ?? -6);  wv('whisp-rot-max',    C.whispRotMax    ?? 6);
+    wv('whisp-pad',        C.whispEdgePad ?? 48);  wt('whisp-pad-val',    C.whispEdgePad   ?? 48);
+    wc('whisp-edge-left',  we[0] ?? true); wc('whisp-edge-right',  we[1] ?? true);
+    wc('whisp-edge-top',   we[2] ?? true); wc('whisp-edge-bottom', we[3] ?? true);
+    if(window.WHISPERS){
+      const W = window.WHISPERS;
+      W.enabled  = C.whispOn       ?? true;
+      W.gapMin   = C.whispGapMin   ?? 0.3;   W.gapMax   = C.whispGapMax   ?? 1.5;
+      W.setPoolSize && W.setPoolSize(C.whispPoolSize ?? 8);
+      W.ghostOpMin   = C.whispGOpMin  ?? 0.10; W.ghostOpMax   = C.whispGOpMax    ?? 0.35;
+      W.ghostHoldMin = C.whispGHoldMin?? 3;    W.ghostHoldMax = C.whispGHoldMax  ?? 8;
+      W.ghostSzMin   = C.whispGSzMin  ?? 12;   W.ghostSzMax   = C.whispGSzMax    ?? 20;
+      W.flashOpMin   = C.whispFOpMin  ?? 0.45; W.flashOpMax   = C.whispFOpMax    ?? 0.75;
+      W.flashHoldMin = C.whispFHoldMin?? 0.5;  W.flashHoldMax = C.whispFHoldMax  ?? 2.0;
+      W.flashSzMin   = C.whispFSzMin  ?? 16;   W.flashSzMax   = C.whispFSzMax    ?? 28;
+      W.rotMin       = C.whispRotMin  ?? -6;   W.rotMax       = C.whispRotMax    ?? 6;
+      W.edgePad      = C.whispEdgePad ?? 48;   W.edges        = we.slice();
+    }
     // scratch
     const st = C.scratchTex ?? 0.25;
     document.getElementById('scratch-tex').value            = st;
@@ -1389,12 +1517,37 @@ void main(){
       fogFlowY:     parseFloat(document.getElementById('fog-flowy').value),
       fogOctaves:   parseFloat(document.getElementById('fog-oct').value),
       fogThrottle:  document.getElementById('fog-throttle').checked,
-      scratchTex:   parseFloat(document.getElementById('scratch-tex').value),
+      scratchTex:      parseFloat(document.getElementById('scratch-tex').value),
+      whispOn:       document.getElementById('whisp-on').checked,
+      whispPoolSize: parseFloat(document.getElementById('whisp-pool').value),
+      whispGapMin:   parseFloat(document.getElementById('whisp-gap-min').value),
+      whispGapMax:   parseFloat(document.getElementById('whisp-gap-max').value),
+      whispGOpMin:   parseFloat(document.getElementById('whisp-gop-min').value),
+      whispGOpMax:   parseFloat(document.getElementById('whisp-gop-max').value),
+      whispGHoldMin: parseFloat(document.getElementById('whisp-ghold-min').value),
+      whispGHoldMax: parseFloat(document.getElementById('whisp-ghold-max').value),
+      whispGSzMin:   parseFloat(document.getElementById('whisp-gsz-min').value),
+      whispGSzMax:   parseFloat(document.getElementById('whisp-gsz-max').value),
+      whispFOpMin:   parseFloat(document.getElementById('whisp-fop-min').value),
+      whispFOpMax:   parseFloat(document.getElementById('whisp-fop-max').value),
+      whispFHoldMin: parseFloat(document.getElementById('whisp-fhold-min').value),
+      whispFHoldMax: parseFloat(document.getElementById('whisp-fhold-max').value),
+      whispFSzMin:   parseFloat(document.getElementById('whisp-fsz-min').value),
+      whispFSzMax:   parseFloat(document.getElementById('whisp-fsz-max').value),
+      whispRotMin:   parseFloat(document.getElementById('whisp-rot-min').value),
+      whispRotMax:   parseFloat(document.getElementById('whisp-rot-max').value),
+      whispEdgePad:  parseFloat(document.getElementById('whisp-pad').value),
+      whispEdges:    [
+        document.getElementById('whisp-edge-left').checked,
+        document.getElementById('whisp-edge-right').checked,
+        document.getElementById('whisp-edge-top').checked,
+        document.getElementById('whisp-edge-bottom').checked,
+      ],
     };
   }
 
   // merge obj into DEFAULTS so stale/partial configs always have all keys
-  function mergeWithDefaults(c) { return Object.assign({}, DEFAULTS, c, { wordDisabled: (c.wordDisabled || DEFAULTS.wordDisabled).slice() }); }
+  function mergeWithDefaults(c) { return Object.assign({}, DEFAULTS, c, { wordDisabled: (c.wordDisabled || DEFAULTS.wordDisabled).slice(), whispEdges: (c.whispEdges || DEFAULTS.whispEdges).slice() }); }
 
   // initial load: fetch (http) → localStorage merged with DEFAULTS (file://) → DEFAULTS
   fetch('config.json?t=' + Date.now(), {cache:'no-store'})
@@ -1488,6 +1641,37 @@ void main(){
   document.getElementById('fog-flowy').addEventListener('input', e => {
     document.getElementById('fog-flowy-val').textContent = parseFloat(e.target.value).toFixed(1);
     window.FOG.flowY = parseFloat(e.target.value);
+  });
+
+  // whisper controls
+  document.getElementById('whisp-on').addEventListener('change', e => { window.WHISPERS.enabled = e.target.checked; });
+  document.getElementById('whisp-pool').addEventListener('input', e => {
+    document.getElementById('whisp-pool-val').textContent = e.target.value;
+    window.WHISPERS.setPoolSize && window.WHISPERS.setPoolSize(parseFloat(e.target.value));
+  });
+  // min/max number inputs — wire each pair directly to WHISPERS
+  const WM = [
+    ['whisp-gap-min',   'whisp-gap-max',   'gapMin',       'gapMax'      ],
+    ['whisp-gop-min',   'whisp-gop-max',   'ghostOpMin',   'ghostOpMax'  ],
+    ['whisp-ghold-min', 'whisp-ghold-max', 'ghostHoldMin', 'ghostHoldMax'],
+    ['whisp-gsz-min',   'whisp-gsz-max',   'ghostSzMin',   'ghostSzMax'  ],
+    ['whisp-fop-min',   'whisp-fop-max',   'flashOpMin',   'flashOpMax'  ],
+    ['whisp-fhold-min', 'whisp-fhold-max', 'flashHoldMin', 'flashHoldMax'],
+    ['whisp-fsz-min',   'whisp-fsz-max',   'flashSzMin',   'flashSzMax'  ],
+    ['whisp-rot-min',   'whisp-rot-max',   'rotMin',       'rotMax'      ],
+  ];
+  WM.forEach(([minId, maxId, minKey, maxKey]) => {
+    document.getElementById(minId).addEventListener('input', e => { window.WHISPERS[minKey] = parseFloat(e.target.value); });
+    document.getElementById(maxId).addEventListener('input', e => { window.WHISPERS[maxKey] = parseFloat(e.target.value); });
+  });
+  document.getElementById('whisp-pad').addEventListener('input', e => {
+    document.getElementById('whisp-pad-val').textContent = e.target.value;
+    window.WHISPERS.edgePad = parseFloat(e.target.value);
+  });
+  ['left','right','top','bottom'].forEach((side, i) => {
+    document.getElementById(`whisp-edge-${side}`).addEventListener('change', e => {
+      window.WHISPERS.edges[i] = e.target.checked;
+    });
   });
 
   // scratch controls
@@ -1622,6 +1806,126 @@ void main(){
     });
     document.getElementById('dev-load').addEventListener('click', () => fileInput.click());
   }
+})();
+</script>
+
+<script>
+/* ── WHISPERS — pool model ───────────────────────────────── */
+(function(){
+  const LINES = [
+    { text: 'Run, Lia! Run!',             type: 'flash' },
+    { text: 'You never cried like this…', type: 'ghost' },
+    { text: '…when they killed me.',      type: 'ghost' },
+    { text: 'Mira!',                      type: 'flash' },
+  ];
+
+  window.WHISPERS = {
+    enabled:      true,
+    poolSize:     8,
+    gapMin:       0.3,  gapMax:       1.5,
+    ghostOpMin:   0.10, ghostOpMax:   0.35,
+    ghostHoldMin: 3,    ghostHoldMax: 8,
+    ghostSzMin:   12,   ghostSzMax:   20,
+    flashOpMin:   0.45, flashOpMax:   0.75,
+    flashHoldMin: 0.5,  flashHoldMax: 2.0,
+    flashSzMin:   16,   flashSzMax:   28,
+    rotMin:      -6,    rotMax:        6,
+    edgePad:      48,
+    edges:        [true, true, true, true],
+  };
+
+  const hero = document.querySelector('.hero');
+  function rnd(a, b){ return a + Math.random() * (b - a); }
+
+  function spawnPos(W, H) {
+    const en = [0,1,2,3].filter(i => window.WHISPERS.edges[i]);
+    if(!en.length) return null;
+    const edge = en[Math.floor(Math.random() * en.length)];
+    const pad  = window.WHISPERS.edgePad;
+    switch(edge){
+      case 0: return { x: pad,               y: rnd(H*0.12, H*0.82), edge };
+      case 1: return { x: W - pad - 180,     y: rnd(H*0.12, H*0.82), edge };
+      case 2: return { x: rnd(W*0.08,W*0.72),y: pad + 60,            edge };
+      default:return { x: rnd(W*0.08,W*0.72),y: H - pad - 36,        edge };
+    }
+  }
+
+  function driftVec(edge){
+    switch(edge){
+      case 0: return 'translate(7px,-2px)';
+      case 1: return 'translate(-7px,-2px)';
+      case 2: return 'translate(1px,6px)';
+      default:return 'translate(1px,-6px)';
+    }
+  }
+
+  // ── each slot runs its own independent forever-loop ──
+  const activeSlots = new Set();
+
+  function runSlot(idx, initialDelay) {
+    activeSlots.add(idx);
+    function cycle() {
+      // retire if pool shrunk
+      if(idx >= window.WHISPERS.poolSize){ activeSlots.delete(idx); return; }
+      // pause if disabled or hero off-screen
+      if(!window.WHISPERS.enabled){
+        setTimeout(cycle, 500); return;
+      }
+      const rect = hero.getBoundingClientRect();
+      if(rect.bottom < 0 || rect.top > window.innerHeight){
+        setTimeout(cycle, 1000); return;
+      }
+
+      const WS  = window.WHISPERS;
+      const W   = hero.offsetWidth, H = hero.offsetHeight;
+      const line = LINES[Math.floor(Math.random() * LINES.length)];
+      const pos  = spawnPos(W, H);
+      if(!pos){ setTimeout(cycle, 200); return; }
+
+      const { x, y, edge } = pos;
+      const rot     = rnd(WS.rotMin,  WS.rotMax);
+      const isFlash = line.type === 'flash';
+      const sz      = isFlash ? rnd(WS.flashSzMin, WS.flashSzMax) : rnd(WS.ghostSzMin, WS.ghostSzMax);
+      const op      = isFlash ? rnd(WS.flashOpMin, WS.flashOpMax) : rnd(WS.ghostOpMin, WS.ghostOpMax);
+      const hold    = isFlash ? rnd(WS.flashHoldMin,WS.flashHoldMax)*1000 : rnd(WS.ghostHoldMin,WS.ghostHoldMax)*1000;
+      const gap     = rnd(WS.gapMin, WS.gapMax) * 1000;
+      const fadeIn  = isFlash ? 70   : 2400;
+      const fadeOut = isFlash ? 60   : 2200;
+
+      const el = document.createElement('div');
+      el.className  = 'whisper';
+      el.textContent = line.text;
+      el.style.cssText = `left:${x}px;top:${y}px;font-size:${sz.toFixed(1)}px;transform:rotate(${rot.toFixed(2)}deg)`;
+      if(isFlash) el.style.textShadow = '0 0 14px rgba(212,180,131,0.55)';
+      hero.appendChild(el);
+
+      requestAnimationFrame(() => {
+        const drift = isFlash ? '' : `,transform ${(hold/1000*1.4).toFixed(1)}s ease`;
+        el.style.transition = `opacity ${fadeIn}ms ease${drift}`;
+        el.style.opacity    = op;
+        if(!isFlash) el.style.transform = `rotate(${rot.toFixed(2)}deg) ${driftVec(edge)}`;
+      });
+
+      // fade out then gap then next cycle
+      setTimeout(() => {
+        el.style.transition = `opacity ${fadeOut}ms ease`;
+        el.style.opacity    = 0;
+        setTimeout(() => { el.remove(); setTimeout(cycle, gap); }, fadeOut + 30);
+      }, hold);
+    }
+    setTimeout(cycle, initialDelay);
+  }
+
+  // public: grow pool to n (shrink is automatic via retirement check)
+  window.WHISPERS.setPoolSize = function(n) {
+    window.WHISPERS.poolSize = n;
+    for(let i = 0; i < n; i++){
+      if(!activeSlots.has(i)) runSlot(i, Math.round(rnd(0, 1200)));
+    }
+  };
+
+  // boot with staggered starts so first appearance isn't a wall at t=0
+  setTimeout(() => window.WHISPERS.setPoolSize(window.WHISPERS.poolSize), 1200);
 })();
 </script>
 </body>
