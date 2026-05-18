@@ -939,6 +939,8 @@
     <label class="dev-check"><span>Enable</span><input type="checkbox" id="whisp-on" checked></label>
     <div class="dev-row" style="margin-top:4px"><span>Pool size</span><span id="whisp-pool-val">8</span></div>
     <input class="dev-slider" type="range" id="whisp-pool" min="1" max="20" step="1" value="8">
+    <div class="dev-row"><span>Min distance (px)</span><span id="whisp-mindist-val">160</span></div>
+    <input class="dev-slider" type="range" id="whisp-mindist" min="0" max="500" step="10" value="160">
 
     <div class="dev-section">Gap between cycles (s)</div>
     <div class="dev-minmax">
@@ -1292,7 +1294,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, whispOn:true, whispPoolSize:8, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, whispOn:true, whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1457,8 +1459,9 @@ void main(){
     function wc(id, val){ document.getElementById(id).checked = val; }
     function wt(id, val){ document.getElementById(id).textContent = val; }
     wc('whisp-on',         C.whispOn       ?? true);
-    wv('whisp-pool',       C.whispPoolSize ?? 8);  wt('whisp-pool-val', C.whispPoolSize ?? 8);
-    wv('whisp-gap-min',    C.whispGapMin   ?? 0.3);wv('whisp-gap-max',    C.whispGapMax   ?? 1.5);
+    wv('whisp-pool',       C.whispPoolSize ?? 8);   wt('whisp-pool-val',     C.whispPoolSize ?? 8);
+    wv('whisp-mindist',    C.whispMinDist  ?? 160); wt('whisp-mindist-val',  C.whispMinDist  ?? 160);
+    wv('whisp-gap-min',    C.whispGapMin   ?? 0.3); wv('whisp-gap-max',      C.whispGapMax   ?? 1.5);
     wv('whisp-gop-min',    C.whispGOpMin  ?? 0.10);wv('whisp-gop-max',    C.whispGOpMax    ?? 0.35);
     wv('whisp-ghold-min',  C.whispGHoldMin?? 3);   wv('whisp-ghold-max',  C.whispGHoldMax  ?? 8);
     wv('whisp-gsz-min',    C.whispGSzMin  ?? 12);  wv('whisp-gsz-max',    C.whispGSzMax    ?? 20);
@@ -1472,6 +1475,7 @@ void main(){
     if(window.WHISPERS){
       const W = window.WHISPERS;
       W.enabled  = C.whispOn       ?? true;
+      W.minDist  = C.whispMinDist  ?? 160;
       W.gapMin   = C.whispGapMin   ?? 0.3;   W.gapMax   = C.whispGapMax   ?? 1.5;
       W.setPoolSize && W.setPoolSize(C.whispPoolSize ?? 8);
       W.ghostOpMin   = C.whispGOpMin  ?? 0.10; W.ghostOpMax   = C.whispGOpMax    ?? 0.35;
@@ -1520,6 +1524,7 @@ void main(){
       scratchTex:      parseFloat(document.getElementById('scratch-tex').value),
       whispOn:       document.getElementById('whisp-on').checked,
       whispPoolSize: parseFloat(document.getElementById('whisp-pool').value),
+      whispMinDist:  parseFloat(document.getElementById('whisp-mindist').value),
       whispGapMin:   parseFloat(document.getElementById('whisp-gap-min').value),
       whispGapMax:   parseFloat(document.getElementById('whisp-gap-max').value),
       whispGOpMin:   parseFloat(document.getElementById('whisp-gop-min').value),
@@ -1648,6 +1653,10 @@ void main(){
   document.getElementById('whisp-pool').addEventListener('input', e => {
     document.getElementById('whisp-pool-val').textContent = e.target.value;
     window.WHISPERS.setPoolSize && window.WHISPERS.setPoolSize(parseFloat(e.target.value));
+  });
+  document.getElementById('whisp-mindist').addEventListener('input', e => {
+    document.getElementById('whisp-mindist-val').textContent = e.target.value;
+    window.WHISPERS.minDist = parseFloat(e.target.value);
   });
   // min/max number inputs — wire each pair directly to WHISPERS
   const WM = [
@@ -1822,6 +1831,7 @@ void main(){
   window.WHISPERS = {
     enabled:      true,
     poolSize:     8,
+    minDist:      160,
     gapMin:       0.3,  gapMax:       1.5,
     ghostOpMin:   0.10, ghostOpMax:   0.35,
     ghostHoldMin: 3,    ghostHoldMax: 8,
@@ -1848,6 +1858,17 @@ void main(){
       case 2: return { x: rnd(W*0.08,W*0.72),y: pad + 60,            edge };
       default:return { x: rnd(W*0.08,W*0.72),y: H - pad - 36,        edge };
     }
+  }
+
+  function isTooClose(x, y) {
+    const minD = window.WHISPERS.minDist;
+    if(minD <= 0) return false;
+    for(const el of hero.querySelectorAll('.whisper')){
+      const dx = x - parseFloat(el.style.left);
+      const dy = y - parseFloat(el.style.top);
+      if(dx*dx + dy*dy < minD*minD) return true;
+    }
+    return false;
   }
 
   function driftVec(edge){
@@ -1879,8 +1900,12 @@ void main(){
       const WS  = window.WHISPERS;
       const W   = hero.offsetWidth, H = hero.offsetHeight;
       const line = LINES[Math.floor(Math.random() * LINES.length)];
-      const pos  = spawnPos(W, H);
-      if(!pos){ setTimeout(cycle, 200); return; }
+      let pos = null;
+      for(let t = 0; t < 10; t++){
+        const c = spawnPos(W, H);
+        if(c && !isTooClose(c.x, c.y)){ pos = c; break; }
+      }
+      if(!pos){ setTimeout(cycle, 400); return; } // no room — wait and retry
 
       const { x, y, edge } = pos;
       const rot     = rnd(WS.rotMin,  WS.rotMax);

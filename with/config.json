@@ -31,7 +31,8 @@
   "fogThrottle": true,
   "scratchTex": 0.55,
   "whispOn": true,
-  "whispPoolSize": 9,
+  "whispPoolSize": 14,
+  "whispMinDist": 160,
   "whispGapMin": 0.3,
   "whispGapMax": 1.5,
   "whispGOpMin": 0.25,
@@ -44,15 +45,15 @@
   "whispFOpMax": 1,
   "whispFHoldMin": 0.5,
   "whispFHoldMax": 2,
-  "whispFSzMin": 16,
-  "whispFSzMax": 28,
+  "whispFSzMin": 36,
+  "whispFSzMax": 66,
   "whispRotMin": -12,
   "whispRotMax": 12,
-  "whispEdgePad": 0,
+  "whispEdgePad": 24,
   "whispEdges": [
     true,
     true,
-    true,
+    false,
     true
   ]
 }
