@@ -929,10 +929,7 @@
     <div>
       <h2 class="section-title">A House That<br>Remembers</h2>
       <div class="gold-bar"></div>
-      <p class="about-text">
-        <p><strong>Orphic House</strong> has been silent for decades. You return not knowing why — only that something buried here is yours. What starts as exploration becomes a descent into the orphanage's darkest chapters.</p>
-        <p>No combat. No escape. Only the weight of what happened here, and whether you choose to carry it or confront it.</p>
-      </p>
+      <div class="about-text"></div>
     </div>
     <div class="about-visual">
       <img src="Screenshot_11.png" style="width:100%;height:100%;object-fit:cover;">
@@ -985,6 +982,94 @@
 </footer>
 
 <script>
+  // ═══════════════════════════════════════════════════════════
+  // PAGE COPY — edit all user-facing text here
+  // ═══════════════════════════════════════════════════════════
+  const COPY = {
+
+    // ── NAV ─────────────────────────────────────────────────
+    nav: [
+      { label: 'Home', href: '#' },
+      { label: 'Trailer', href: '#trailer' },
+      { label: 'Gallery', href: '#gallery' },
+      { label: 'About', href: '#about' },
+    ],
+
+    // ── HERO ─────────────────────────────────────────────────
+    heroTitle: 'Whisper in the Halls',
+    heroDesc: `An atmospheric, <em>first person institutional-horror</em> game set in the remains of a defunct orphanage — taking you through its deceptive past and bone-chilling revelations.`,
+    heroCta: 'Wishlist on Steam',
+    heroCtaUrl: 'https://store.steampowered.com',
+
+    // ── TRAILER ──────────────────────────────────────────────
+    trailerLabel: 'Trailer',
+    trailerComingSoon: 'Coming Soon',
+
+    // ── ABOUT ────────────────────────────────────────────────
+    aboutTitle: 'A House That<br>Remembers',
+    aboutBody: `<p><strong>Orphic House</strong> has been silent for decades. You return not knowing why — only that something buried here is yours. What starts as exploration becomes a descent into the orphanage's darkest chapters.</p>
+               <p>No combat. No escape. Only the weight of what happened here, and whether you choose to carry it or confront it.</p>`,
+
+    // ── GALLERY ──────────────────────────────────────────────
+    galleryTitle: 'A Glimpse Inside',
+
+    // ── FOOTER CTA ───────────────────────────────────────────
+    footerTitle: `Don't Go In Alone.`,
+    footerSub: 'Wishlist now and be the first to know when the doors open!',
+    footerCta: 'Wishlist on Steam',
+    footerCtaUrl: 'https://store.steampowered.com',
+    socials: [
+      { label: 'Discord', href: '#' },
+      { label: 'Reddit', href: '#' },
+      { label: 'Twitter / X', href: '#' },
+    ],
+
+    // ── FOOTER ───────────────────────────────────────────────
+    copyright: '© 2025 Whisper in the Halls · All rights reserved',
+
+  };
+  // ═══════════════════════════════════════════════════════════
+  // Apply — do not edit below this line
+  // ═══════════════════════════════════════════════════════════
+  (function (C) {
+    const qs = s => document.querySelector(s);
+    // nav
+    document.querySelectorAll('.nav-links a').forEach((a, i) => {
+      if (!C.nav[i]) return;
+      a.textContent = C.nav[i].label;
+      a.href = C.nav[i].href;
+    });
+    // hero (title stays in HTML — animated by JS below; only desc/cta updated here)
+    if (qs('.hero-title')) qs('.hero-title').textContent = C.heroTitle;
+    if (qs('.hero-desc')) qs('.hero-desc').innerHTML = C.heroDesc;
+    if (qs('.hero-content .btn-wishlist')) {
+      qs('.hero-content .btn-wishlist span').textContent = C.heroCta;
+      qs('.hero-content .btn-wishlist').href = C.heroCtaUrl;
+    }
+    // trailer
+    if (qs('.trailer-label')) qs('.trailer-label').textContent = C.trailerLabel;
+    if (qs('.trailer-coming-soon')) qs('.trailer-coming-soon').textContent = C.trailerComingSoon;
+    // about
+    if (qs('#about .section-title')) qs('#about .section-title').innerHTML = C.aboutTitle;
+    if (qs('.about-text')) qs('.about-text').innerHTML = C.aboutBody;
+    // gallery
+    if (qs('.gallery-header .section-title')) qs('.gallery-header .section-title').textContent = C.galleryTitle;
+    // footer cta
+    if (qs('.footer-title')) qs('.footer-title').textContent = C.footerTitle;
+    if (qs('.footer-sub')) qs('.footer-sub').textContent = C.footerSub;
+    if (qs('.footer-cta .btn-wishlist')) {
+      qs('.footer-cta .btn-wishlist span').textContent = C.footerCta;
+      qs('.footer-cta .btn-wishlist').href = C.footerCtaUrl;
+    }
+    document.querySelectorAll('.social-link').forEach((a, i) => {
+      if (!C.socials[i]) return;
+      a.textContent = C.socials[i].label;
+      a.href = C.socials[i].href;
+    });
+    // footer
+    if (qs('footer')) qs('footer').innerHTML = C.copyright;
+  })(COPY);
+
 (function(){
   const title = document.querySelector('.hero-title');
   if(!title) return;
