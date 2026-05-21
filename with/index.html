@@ -59,7 +59,7 @@
     .nav-links a {
       color: rgba(224,216,200,0.6);
       text-decoration: none;
-      font-size: 13px;
+      font-size: var(--fs-nav, 13px);
       letter-spacing: 2px;
       text-transform: uppercase;
       transition: color 0.2s;
@@ -131,7 +131,7 @@
     .hero-title {
       font-family: 'Jolly Lodger', cursive;
       font-weight: 800;
-      font-size: clamp(60px, 9.2vw, 115px);
+      font-size: var(--fs-title, clamp(60px, 9.2vw, 115px));
       color: var(--gold);
       line-height: 1.05;
       margin-bottom: 10px;
@@ -142,7 +142,7 @@
     }
 
     .hero-subtitle {
-      font-size: 14px;
+      font-size: var(--fs-subtitle, 14px);
       color: rgba(212,180,131,0.45);
       letter-spacing: 4px;
       text-transform: uppercase;
@@ -154,11 +154,11 @@
     }
 
     .hero-desc {
-      font-size: 19px;
+      font-size: var(--fs-desc, 19px);
       color: rgba(224,216,200,0.92);
       max-width: 560px;
       margin: 0 auto 44px;
-      line-height: 1.75;
+      line-height: var(--lh-desc, 1.75);
       text-shadow:
         0 1px 3px rgba(0,0,0,var(--hero-tshadow,1)),
         0 4px 14px rgba(0,0,0,calc(var(--hero-tshadow,1) * 0.9)),
@@ -246,7 +246,7 @@
       font-family: 'Jolly Lodger', cursive;
       font-weight: 700;
       color: var(--gold);
-      font-size: clamp(32px, 4.6vw, 51px);
+      font-size: var(--fs-section-title, clamp(32px, 4.6vw, 51px));
       line-height: 1.1;
     }
 
@@ -348,7 +348,7 @@
       color: rgba(224,216,200,0.78);
       line-height: 1.85;
       margin-bottom: 18px;
-      font-size: 17px;
+      font-size: var(--fs-body, 17px);
     }
 
     .about-text strong { color: var(--gold); font-weight: 600; }
@@ -598,7 +598,7 @@
 
     /* To use real photos: <img src="sid.jpg" style="width:100%;height:100%;object-fit:cover;filter:grayscale(1)"> */
     .team-role {
-      font-size: 12px;
+      font-size: var(--fs-team-role, 12px);
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--amber);
@@ -608,12 +608,12 @@
     .team-name {
       font-family: 'Jolly Lodger', cursive;
       color: var(--gold);
-      font-size: 25px;
+      font-size: var(--fs-team-name, 25px);
       margin-bottom: 12px;
     }
 
     .team-bio {
-      font-size: 15px;
+      font-size: var(--fs-team-bio, 15px);
       color: rgba(224,216,200,0.62);
       line-height: 1.75;
     }
@@ -1137,6 +1137,7 @@
     <button class="dev-tab"        data-tab="whisp">Screams</button>
     <button class="dev-tab"        data-tab="bgm">BGM</button>
     <button class="dev-tab"        data-tab="layout">Layout</button>
+    <button class="dev-tab"        data-tab="type">Type</button>
   </div>
 
   <!-- ── TITLE TAB ── -->
@@ -1316,6 +1317,31 @@
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-top"    checked style="accent-color:#D4B483"> Top</label>
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-bottom" checked style="accent-color:#D4B483"> Bottom</label>
     </div>
+  </div>
+
+  <!-- ── TYPE TAB ── -->
+  <div class="dev-pane" id="tab-type">
+
+    <div class="dev-section">Hero</div>
+    <div class="dev-row"><span>Title</span><span id="fs-title-val">88px</span></div>
+    <input class="dev-slider" type="range" id="fs-title" min="40" max="140" step="1" value="88">
+    <div class="dev-row"><span>Subtitle</span><span id="fs-subtitle-val">14px</span></div>
+    <input class="dev-slider" type="range" id="fs-subtitle" min="10" max="28" step="1" value="14">
+    <div class="dev-row"><span>Description</span><span id="fs-desc-val">19px</span></div>
+    <input class="dev-slider" type="range" id="fs-desc" min="13" max="30" step="1" value="19">
+    <div class="dev-row"><span>Desc line height</span><span id="lh-desc-val">1.75</span></div>
+    <input class="dev-slider" type="range" id="lh-desc" min="1" max="3" step="0.05" value="1.75">
+
+    <div class="dev-section">Nav</div>
+    <div class="dev-row"><span>Links</span><span id="fs-nav-val">13px</span></div>
+    <input class="dev-slider" type="range" id="fs-nav" min="10" max="22" step="1" value="13">
+
+    <div class="dev-section">Sections</div>
+    <div class="dev-row"><span>Section title</span><span id="fs-section-title-val">42px</span></div>
+    <input class="dev-slider" type="range" id="fs-section-title" min="20" max="80" step="1" value="42">
+    <div class="dev-row"><span>Body text</span><span id="fs-body-val">17px</span></div>
+    <input class="dev-slider" type="range" id="fs-body" min="12" max="26" step="1" value="17">
+
   </div>
 
   <!-- ── LAYOUT TAB ── -->
@@ -1651,7 +1677,8 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchOn:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchOn:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, fsTitle:88, fsSubtitle:14, fsDesc:19, lhDesc:1.75, fsNav:13, fsSectionTitle:42, fsBody:17,
+    trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1875,6 +1902,23 @@ void main(){
     document.getElementById('scratch-tex-val').textContent  = parseFloat(st).toFixed(2);
     document.getElementById('scratch-tex').disabled         = !sOn;
     window.applyScratch && window.applyScratch(null, sOn ? st : 0);
+    // type sizes
+    { const r = document.documentElement;
+      const fsMap = [
+        ['fs-title',        'fsTitle',        88,  'px'],
+        ['fs-subtitle',     'fsSubtitle',     14,  'px'],
+        ['fs-desc',         'fsDesc',         19,  'px'],
+        ['fs-nav',          'fsNav',          13,  'px'],
+        ['fs-section-title','fsSectionTitle', 42,  'px'],
+        ['fs-body',         'fsBody',         17,  'px'],
+        ['lh-desc',         'lhDesc',         1.75, ''],
+      ];
+      fsMap.forEach(([id, key, def, unit]) => {
+        const v = C[key] ?? def;
+        wv(id, v); wt(id + '-val', v + (unit || ''));
+        r.style.setProperty('--' + id, v + (unit || ''));
+      });
+    }
     // layout
     { const r = document.documentElement;
       const url = C.heroBgUrl ?? 'Screenshot_4.png';
@@ -1941,6 +1985,13 @@ void main(){
       fogThrottle:  document.getElementById('fog-throttle').checked,
       scratchOn:       document.getElementById('scratch-on').checked,
       scratchTex:      parseFloat(document.getElementById('scratch-tex').value),
+      fsTitle:       parseFloat(document.getElementById('fs-title').value),
+      fsSubtitle:    parseFloat(document.getElementById('fs-subtitle').value),
+      fsDesc:        parseFloat(document.getElementById('fs-desc').value),
+      lhDesc:        parseFloat(document.getElementById('lh-desc').value),
+      fsNav:         parseFloat(document.getElementById('fs-nav').value),
+      fsSectionTitle:parseFloat(document.getElementById('fs-section-title').value),
+      fsBody:        parseFloat(document.getElementById('fs-body').value),
       heroBgUrl:    document.getElementById('hbg-url').value,
       heroBgX:      parseFloat(document.getElementById('hbg-x').value),
       heroBgY:      parseFloat(document.getElementById('hbg-y').value),
@@ -2162,6 +2213,23 @@ void main(){
     if(document.getElementById('scratch-on').checked)
       window.applyScratch && window.applyScratch(null, parseFloat(e.target.value));
   });
+
+  // type size controls
+  (function(){
+    const r = document.documentElement;
+    const fsIds = ['fs-title','fs-subtitle','fs-desc','fs-nav','fs-section-title','fs-body'];
+    // line-height (unitless)
+    document.getElementById('lh-desc').addEventListener('input', e => {
+      document.getElementById('lh-desc-val').textContent = parseFloat(e.target.value).toFixed(2);
+      r.style.setProperty('--lh-desc', e.target.value);
+    });
+    fsIds.forEach(id => {
+      document.getElementById(id).addEventListener('input', e => {
+        document.getElementById(id + '-val').textContent = e.target.value + 'px';
+        r.style.setProperty('--' + id, e.target.value + 'px');
+      });
+    });
+  })();
 
   // layout controls
   (function(){
