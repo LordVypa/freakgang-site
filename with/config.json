@@ -35,6 +35,8 @@
   "heroBgX": 51,
   "heroBgY": 50,
   "heroBgOv": 1,
+  "heroPool": 0,
+  "heroTshadow": 1,
   "trailerW": 1020,
   "bgmOn": true,
   "bgmVolume": 0.5,
