@@ -2,7 +2,7 @@
   "amp": 2.5,
   "spd": 0.8,
   "glow": 0.9,
-  "glowInv": true,
+  "glowInv": false,
   "breatheOn": true,
   "breatheSpeed": 4,
   "breatheDepth": 0.5,
