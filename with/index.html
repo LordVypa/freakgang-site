@@ -2115,12 +2115,17 @@ void main(){
 <script>
 /* ── WHISPERS — pool model ───────────────────────────────── */
 (function(){
-  const LINES = [
+  const FALLBACK_LINES = [
     { text: 'Run, Lia! Run!',             type: 'flash' },
     { text: 'You never cried like this…', type: 'ghost' },
     { text: '…when they killed me.',      type: 'ghost' },
     { text: 'Mira!',                      type: 'flash' },
   ];
+  let LINES = FALLBACK_LINES;
+  fetch('lines.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => { if(Array.isArray(data) && data.length) LINES = data; })
+    .catch(() => {});
 
   window.WHISPERS = {
     enabled:      true,
