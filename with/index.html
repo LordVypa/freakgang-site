@@ -244,6 +244,84 @@
       margin: 20px 0 28px;
     }
 
+    /* ─── TRAILER ────────────────────────────────────── */
+    #trailer {
+      padding: 100px 40px;
+      text-align: center;
+      background: #000;
+    }
+    .trailer-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(212,180,131,0.45);
+      margin-bottom: 18px;
+    }
+    .trailer-heading {
+      font-family: 'Jolly Lodger', cursive;
+      font-size: clamp(38px, 5vw, 64px);
+      color: var(--gold);
+      margin-bottom: 48px;
+      letter-spacing: 0.03em;
+    }
+    .trailer-frame {
+      position: relative;
+      max-width: var(--trailer-w, 1000px);
+      margin: 0 auto;
+      aspect-ratio: 16 / 9;
+      background: #0a0602;
+      border: 1px solid rgba(212,180,131,0.12);
+      overflow: hidden;
+    }
+    /* noise grain overlay on placeholder */
+    .trailer-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .trailer-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 2;
+    }
+    .trailer-play {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(212,180,131,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(212,180,131,0.5);
+    }
+    .trailer-coming-soon {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(212,180,131,0.3);
+    }
+    /* vignette corners */
+    .trailer-frame::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.7);
+      z-index: 3;
+      pointer-events: none;
+    }
+
     /* ─── ABOUT ──────────────────────────────────────── */
     .about-grid {
       display: grid;
@@ -723,6 +801,21 @@
   </div>
 </div>
 
+<!-- ═══ TRAILER ═══════════════════════════════════════════ -->
+<section id="trailer">
+  <p class="trailer-label">Trailer</p>
+  <div class="trailer-frame">
+    <div class="trailer-placeholder">
+      <div class="trailer-play">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <polygon points="6,3 21,12 6,21" fill="rgba(212,180,131,0.55)"/>
+        </svg>
+      </div>
+      <span class="trailer-coming-soon">Coming Soon</span>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ ABOUT ═════════════════════════════════════════════ -->
 <section class="section" id="about">
   <div class="about-grid">
@@ -893,6 +986,7 @@
     <button class="dev-tab"        data-tab="fog">Fog</button>
     <button class="dev-tab"        data-tab="whisp">Screams</button>
     <button class="dev-tab"        data-tab="bgm">BGM</button>
+    <button class="dev-tab"        data-tab="layout">Layout</button>
   </div>
 
   <!-- ── TITLE TAB ── -->
@@ -1071,6 +1165,13 @@
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-top"    checked style="accent-color:#D4B483"> Top</label>
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-bottom" checked style="accent-color:#D4B483"> Bottom</label>
     </div>
+  </div>
+
+  <!-- ── LAYOUT TAB ── -->
+  <div class="dev-pane" id="tab-layout">
+    <div class="dev-section">Trailer</div>
+    <div class="dev-row"><span>Frame width (px)</span><span id="trailer-w-val">1000</span></div>
+    <input class="dev-slider" type="range" id="trailer-w" min="400" max="1400" step="20" value="1000">
   </div>
 
   <!-- ── BGM TAB ── -->
@@ -1373,7 +1474,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, trailerW:1000, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1594,6 +1695,11 @@ void main(){
     document.getElementById('scratch-tex').value            = st;
     document.getElementById('scratch-tex-val').textContent  = parseFloat(st).toFixed(2);
     window.applyScratch && window.applyScratch(null, st);
+    // layout
+    { const tw = C.trailerW ?? 1000;
+      wv('trailer-w', tw); wt('trailer-w-val', tw);
+      document.documentElement.style.setProperty('--trailer-w', tw + 'px');
+    }
     // bgm
     const bgmOn  = C.bgmOn      ?? true;
     const bgmVol = C.bgmVolume  ?? 0.5;
@@ -1636,6 +1742,7 @@ void main(){
       fogOctaves:   parseFloat(document.getElementById('fog-oct').value),
       fogThrottle:  document.getElementById('fog-throttle').checked,
       scratchTex:      parseFloat(document.getElementById('scratch-tex').value),
+      trailerW:     parseFloat(document.getElementById('trailer-w').value),
       bgmOn:        document.getElementById('bgm-on').checked,
       bgmVolume:    parseFloat(document.getElementById('bgm-vol').value),
       bgmCrossfade: parseFloat(document.getElementById('bgm-cf').value),
@@ -1842,6 +1949,12 @@ void main(){
   document.getElementById('scratch-tex').addEventListener('input', e => {
     document.getElementById('scratch-tex-val').textContent = parseFloat(e.target.value).toFixed(2);
     window.applyScratch && window.applyScratch(null, parseFloat(e.target.value));
+  });
+
+  // layout controls
+  document.getElementById('trailer-w').addEventListener('input', e => {
+    document.getElementById('trailer-w-val').textContent = e.target.value;
+    document.documentElement.style.setProperty('--trailer-w', e.target.value + 'px');
   });
 
   // bgm controls
