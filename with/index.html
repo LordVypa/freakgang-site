@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Whisper in the Halls</title>
-  <link href="https://fonts.googleapis.com/css2?family=Jolly+Lodger&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jolly+Lodger&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@400;600&family=Creepster&family=Nosifer&family=Butcherman&family=Eater&family=Henny+Penny&family=Uncial+Antiqua&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -622,8 +622,7 @@
     }
     .whisper {
       position: absolute;
-      font-family: 'Crimson Pro', Georgia, serif;
-      font-style: italic;
+      font-family: 'Jolly Lodger', cursive;
       color: var(--whisp-color, #D4B483);
       pointer-events: none;
       user-select: none;
@@ -948,8 +947,23 @@
   <!-- ── WHISP TAB ── -->
   <div class="dev-pane" id="tab-whisp">
     <label class="dev-check"><span>Enable</span><input type="checkbox" id="whisp-on" checked></label>
-    <div class="dev-row" style="margin-top:6px"><span>Color</span></div>
-    <input type="color" id="whisp-color" value="#D4B483" style="width:100%;height:28px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px;margin-bottom:10px">
+    <div class="dev-row" style="margin-top:6px"><span>Color A</span><span>Color B</span></div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input type="color" id="whisp-color"  value="#D4B483" style="flex:1;height:28px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px">
+      <input type="color" id="whisp-color2" value="#D4B483" style="flex:1;height:28px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px">
+    </div>
+    <div class="dev-row" style="margin-top:2px"><span>Scream font</span></div>
+    <select id="whisp-font" style="width:100%;margin-bottom:10px;background:#0a0602;color:rgba(212,180,131,0.85);border:1px solid rgba(212,180,131,0.2);border-radius:2px;padding:4px 6px;font-size:12px;cursor:pointer">
+      <option value="'Jolly Lodger', cursive">Jolly Lodger</option>
+      <option value="'Creepster', cursive">Creepster</option>
+      <option value="'Nosifer', cursive">Nosifer</option>
+      <option value="'Butcherman', cursive">Butcherman</option>
+      <option value="'Eater', cursive">Eater</option>
+      <option value="'Henny Penny', cursive">Henny Penny</option>
+      <option value="'Uncial Antiqua', cursive">Uncial Antiqua</option>
+      <option value="'UnifrakturMaguntia', cursive">UnifrakturMaguntia</option>
+      <option value="'Crimson Pro', Georgia, serif" style="font-style:italic">Crimson Pro (italic)</option>
+    </select>
     <div class="dev-row"><span>Pool size</span><span id="whisp-pool-val">8</span></div>
     <input class="dev-slider" type="range" id="whisp-pool" min="1" max="20" step="1" value="8">
     <div class="dev-row"><span>Min distance (px)</span><span id="whisp-mindist-val">160</span></div>
@@ -1319,7 +1333,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, whispOn:true, whispColor:'#D4B483', whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, whispOn:true, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1485,6 +1499,8 @@ void main(){
     function wt(id, val){ document.getElementById(id).textContent = val; }
     wc('whisp-on',         C.whispOn       ?? true);
     wv('whisp-color',      C.whispColor    ?? '#D4B483');
+    wv('whisp-color2',     C.whispColor2   ?? '#D4B483');
+    wv('whisp-font',       C.whispFont     ?? "'Jolly Lodger', cursive");
     wv('whisp-pool',       C.whispPoolSize ?? 8);   wt('whisp-pool-val',     C.whispPoolSize ?? 8);
     wv('whisp-mindist',    C.whispMinDist  ?? 160); wt('whisp-mindist-val',  C.whispMinDist  ?? 160);
     wv('whisp-gap-min',    C.whispGapMin   ?? 0.3); wv('whisp-gap-max',      C.whispGapMax   ?? 1.5);
@@ -1502,6 +1518,8 @@ void main(){
       const W = window.WHISPERS;
       W.enabled  = C.whispOn       ?? true;
       W.color    = C.whispColor    ?? '#D4B483';
+      W.color2   = C.whispColor2   ?? '#D4B483';
+      W.font     = C.whispFont     ?? "'Jolly Lodger', cursive";
       W.setColor && W.setColor(W.color);
       W.minDist  = C.whispMinDist  ?? 160;
       W.gapMin   = C.whispGapMin   ?? 0.3;   W.gapMax   = C.whispGapMax   ?? 1.5;
@@ -1567,6 +1585,8 @@ void main(){
       bgmCrossfade: parseFloat(document.getElementById('bgm-cf').value),
       whispOn:       document.getElementById('whisp-on').checked,
       whispColor:    document.getElementById('whisp-color').value,
+      whispColor2:   document.getElementById('whisp-color2').value,
+      whispFont:     document.getElementById('whisp-font').value,
       whispPoolSize: parseFloat(document.getElementById('whisp-pool').value),
       whispMinDist:  parseFloat(document.getElementById('whisp-mindist').value),
       whispGapMin:   parseFloat(document.getElementById('whisp-gap-min').value),
@@ -1693,6 +1713,12 @@ void main(){
   document.getElementById('whisp-color').addEventListener('input', e => {
     window.WHISPERS.color = e.target.value;
     window.WHISPERS.setColor && window.WHISPERS.setColor(e.target.value);
+  });
+  document.getElementById('whisp-color2').addEventListener('input', e => {
+    window.WHISPERS.color2 = e.target.value;
+  });
+  document.getElementById('whisp-font').addEventListener('change', e => {
+    window.WHISPERS.font = e.target.value;
   });
   document.getElementById('whisp-pool').addEventListener('input', e => {
     document.getElementById('whisp-pool-val').textContent = e.target.value;
@@ -2130,6 +2156,8 @@ void main(){
   window.WHISPERS = {
     enabled:      true,
     color:        '#D4B483',
+    color2:       '#D4B483',
+    font:         "'Jolly Lodger', cursive",
     poolSize:     8,
     minDist:      160,
     gapMin:       0.3,  gapMax:       1.5,
@@ -2221,6 +2249,9 @@ void main(){
       const fadeIn  = isFlash ? 70   : 2400;
       const fadeOut = isFlash ? 700  : 3200;
 
+      // pick one of the two colors at random per scream
+      const color   = (WS.color2 && WS.color2 !== WS.color && Math.random() < 0.5) ? WS.color2 : WS.color;
+
       // randomise shiver speed per element so they don't all pulse in sync
       const shiverMs = Math.round(rnd(isFlash ? 260 : 380, isFlash ? 420 : 580));
       const rotDeg   = rot.toFixed(2) + 'deg';
@@ -2228,10 +2259,10 @@ void main(){
       const el = document.createElement('div');
       el.className   = 'whisper';
       el.textContent = line.text;
-      el.style.cssText = `left:${x}px;top:${y}px;font-size:${sz.toFixed(1)}px`;
+      el.style.cssText = `left:${x}px;top:${y}px;font-size:${sz.toFixed(1)}px;color:${color};font-family:${WS.font || "'Jolly Lodger', cursive"}`;
       el.style.setProperty('--wr', rotDeg);
       el.style.animation = `whisp-shiver ${shiverMs}ms ease-in-out infinite`;
-      if(isFlash) el.style.textShadow = `0 0 14px ${hexToRgba(window.WHISPERS.color, 0.55)}`;
+      if(isFlash) el.style.textShadow = `0 0 14px ${hexToRgba(color, 0.55)}`;
       hero.appendChild(el);
 
       // fade in
