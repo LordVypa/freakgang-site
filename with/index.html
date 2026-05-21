@@ -365,7 +365,7 @@
 
     .about-text p {
       color: rgba(224,216,200,0.78);
-      line-height: 1.85;
+      line-height: var(--lh-desc, 1.85);
       margin-bottom: 18px;
       font-size: var(--fs-body, 17px);
     }
@@ -736,7 +736,8 @@
 
     .footer-sub {
       color: var(--text-dim);
-      font-size: 16px;
+      font-size: var(--fs-body, 16px);
+      line-height: var(--lh-desc, 1.75);
       margin-bottom: 44px;
       letter-spacing: 0.3px;
     }
