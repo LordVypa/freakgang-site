@@ -631,6 +631,28 @@
       opacity: 0;
       letter-spacing: 0.5px;
     }
+    .whisper::before,
+    .whisper::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      white-space: nowrap;
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      pointer-events: none;
+      letter-spacing: inherit;
+    }
+    .whisper::before {
+      opacity: var(--whisp-after-op, 0);
+      filter: blur(var(--whisp-after-blur, 0px));
+      transform: translate(-3px, 1.5px);
+    }
+    .whisper::after {
+      opacity: calc(var(--whisp-after-op, 0) * 0.55);
+      filter: blur(calc(var(--whisp-after-blur, 0px) * 2));
+      transform: translate(3px, -1px);
+    }
 
     /* ─── SCRATCH OVERLAY ────────────────────────────── */
     .hero-title-wrap { position: relative; display: inline-block; }
@@ -964,6 +986,14 @@
       <option value="'UnifrakturMaguntia', cursive">UnifrakturMaguntia</option>
       <option value="'Crimson Pro', Georgia, serif" style="font-style:italic">Crimson Pro (italic)</option>
     </select>
+
+    <div class="dev-section">Afterimage</div>
+    <label class="dev-check"><span>Enable</span><input type="checkbox" id="whisp-after-on"></label>
+    <div class="dev-row"><span>Blur (px)</span><span id="whisp-after-blur-val">1.5</span></div>
+    <input class="dev-slider" type="range" id="whisp-after-blur" min="0" max="8" step="0.5" value="1.5" disabled>
+    <div class="dev-row"><span>Opacity</span><span id="whisp-after-op-val">0.40</span></div>
+    <input class="dev-slider" type="range" id="whisp-after-op" min="0" max="1" step="0.05" value="0.40" disabled>
+
     <div class="dev-row"><span>Pool size</span><span id="whisp-pool-val">8</span></div>
     <input class="dev-slider" type="range" id="whisp-pool" min="1" max="20" step="1" value="8">
     <div class="dev-row"><span>Min distance (px)</span><span id="whisp-mindist-val">160</span></div>
@@ -1343,7 +1373,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1510,6 +1540,18 @@ void main(){
     wc('whisp-on',         C.whispOn       ?? true);
     wc('whisp-ghost-on',   C.whispGhostOn  ?? true);
     wc('whisp-flash-on',   C.whispFlashOn  ?? true);
+    { const aOn = C.whispAfterOn ?? false;
+      wc('whisp-after-on',  aOn);
+      const aBlur = C.whispAfterBlur ?? 1.5;
+      const aOp   = C.whispAfterOp   ?? 0.40;
+      wv('whisp-after-blur', aBlur); wt('whisp-after-blur-val', parseFloat(aBlur).toFixed(1));
+      wv('whisp-after-op',   aOp);   wt('whisp-after-op-val',   parseFloat(aOp).toFixed(2));
+      document.getElementById('whisp-after-blur').disabled = !aOn;
+      document.getElementById('whisp-after-op').disabled   = !aOn;
+      const hero = document.querySelector('.hero');
+      hero.style.setProperty('--whisp-after-blur', aOn ? aBlur + 'px' : '0px');
+      hero.style.setProperty('--whisp-after-op',   aOn ? aOp : 0);
+    }
     wv('whisp-color',      C.whispColor    ?? '#D4B483');
     wv('whisp-color2',     C.whispColor2   ?? '#D4B483');
     wv('whisp-font',       C.whispFont     ?? "'Jolly Lodger', cursive");
@@ -1600,6 +1642,9 @@ void main(){
       whispOn:       document.getElementById('whisp-on').checked,
       whispGhostOn:  document.getElementById('whisp-ghost-on').checked,
       whispFlashOn:  document.getElementById('whisp-flash-on').checked,
+      whispAfterOn:  document.getElementById('whisp-after-on').checked,
+      whispAfterBlur:parseFloat(document.getElementById('whisp-after-blur').value),
+      whispAfterOp:  parseFloat(document.getElementById('whisp-after-op').value),
       whispColor:    document.getElementById('whisp-color').value,
       whispColor2:   document.getElementById('whisp-color2').value,
       whispFont:     document.getElementById('whisp-font').value,
@@ -1728,6 +1773,28 @@ void main(){
   document.getElementById('whisp-on').addEventListener('change', e => { window.WHISPERS.enabled = e.target.checked; });
   document.getElementById('whisp-ghost-on').addEventListener('change', e => { window.WHISPERS.ghostOn = e.target.checked; });
   document.getElementById('whisp-flash-on').addEventListener('change', e => { window.WHISPERS.flashOn = e.target.checked; });
+  (function(){
+    const hero   = document.querySelector('.hero');
+    const onChk  = document.getElementById('whisp-after-on');
+    const blurEl = document.getElementById('whisp-after-blur');
+    const opEl   = document.getElementById('whisp-after-op');
+    function applyAfter() {
+      const on = onChk.checked;
+      blurEl.disabled = !on;
+      opEl.disabled   = !on;
+      hero.style.setProperty('--whisp-after-blur', on ? blurEl.value + 'px' : '0px');
+      hero.style.setProperty('--whisp-after-op',   on ? opEl.value : 0);
+    }
+    onChk.addEventListener('change', applyAfter);
+    blurEl.addEventListener('input', e => {
+      document.getElementById('whisp-after-blur-val').textContent = parseFloat(e.target.value).toFixed(1);
+      if(onChk.checked) hero.style.setProperty('--whisp-after-blur', e.target.value + 'px');
+    });
+    opEl.addEventListener('input', e => {
+      document.getElementById('whisp-after-op-val').textContent = parseFloat(e.target.value).toFixed(2);
+      if(onChk.checked) hero.style.setProperty('--whisp-after-op', e.target.value);
+    });
+  })();
   document.getElementById('whisp-color').addEventListener('input', e => {
     window.WHISPERS.color = e.target.value;
     window.WHISPERS.setColor && window.WHISPERS.setColor(e.target.value);
@@ -2283,6 +2350,7 @@ void main(){
       const el = document.createElement('div');
       el.className   = 'whisper';
       el.textContent = line.text;
+      el.dataset.text = line.text;
       el.style.cssText = `left:${x}px;top:${y}px;font-size:${sz.toFixed(1)}px;color:${color};font-family:${WS.font || "'Jolly Lodger', cursive"}`;
       el.style.setProperty('--wr', rotDeg);
       el.style.animation = `whisp-shiver ${shiverMs}ms ease-in-out infinite`;
