@@ -485,6 +485,42 @@
       z-index: 10;
     }
 
+    /* dust ring on settle */
+    .gallery-item::before {
+      content: '';
+      position: absolute;
+      top:    var(--dust-fi-t, 6%);
+      left:   var(--dust-fi-l, 6%);
+      right:  var(--dust-fi-r, 5%);
+      bottom: var(--dust-fi-b, 19%);
+      pointer-events: none;
+      z-index: 3;
+      border-radius: 2px;
+      opacity: 0;
+    }
+    .gallery-item.dust-settle::before {
+      animation: dust-ring 0.38s ease-out forwards;
+    }
+    @keyframes dust-ring {
+      0%   { box-shadow: 0 2px 0 0 rgba(210,185,140,0.38); opacity: 1; }
+      60%  { box-shadow: 0 6px 6px 10px rgba(210,185,140,0.12); opacity: 1; }
+      100% { box-shadow: 0 10px 10px 22px rgba(210,185,140,0); opacity: 0; }
+    }
+
+    /* dust particles */
+    .dust-particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(220,195,150,0.9) 0%, rgba(180,155,110,0.4) 100%);
+      pointer-events: none;
+      z-index: 4;
+      animation: dust-fly var(--dp-dur, 0.4s) ease-out forwards;
+    }
+    @keyframes dust-fly {
+      0%   { transform: translate(0,0) scale(1);   opacity: var(--dp-op, 0.7); }
+      100% { transform: translate(var(--dp-dx),var(--dp-dy)) scale(0.2); opacity: 0; }
+    }
+
     /* ─── STORY CHAPTERS ─────────────────────────────── */
     .story-section {
       padding: 100px 60px;
@@ -1415,6 +1451,32 @@
     <div class="dev-row"><span>Zoom scale</span><span id="gal-hover-scale-val">1.05</span></div>
     <input class="dev-slider" type="range" id="gal-hover-scale" min="1" max="1.5" step="0.01" value="1.05">
 
+    <div class="dev-section">Dust Effect</div>
+    <div class="dev-row">
+      <span>Enable</span>
+      <input type="checkbox" id="dust-effect-on" checked style="accent-color:#D4B483;width:16px;height:16px;cursor:pointer">
+    </div>
+    <div class="dev-row"><span>Frame inset top (%)</span><span id="dust-fi-t-val">6</span></div>
+    <input class="dev-slider" type="range" id="dust-fi-t" min="0" max="30" step="0.5" value="6">
+    <div class="dev-row"><span>Frame inset bottom (%)</span><span id="dust-fi-b-val">19</span></div>
+    <input class="dev-slider" type="range" id="dust-fi-b" min="0" max="40" step="0.5" value="19">
+    <div class="dev-row"><span>Frame inset sides (%)</span><span id="dust-fi-s-val">6</span></div>
+    <input class="dev-slider" type="range" id="dust-fi-s" min="0" max="20" step="0.5" value="6">
+    <div class="dev-row"><span>Fire at (% of transition)</span><span id="dust-trigger-val">100</span></div>
+    <input class="dev-slider" type="range" id="dust-trigger" min="0" max="100" step="1" value="100">
+    <div class="dev-row"><span>Particle count</span><span id="dust-count-val">9</span></div>
+    <input class="dev-slider" type="range" id="dust-count" min="1" max="24" step="1" value="9">
+    <div class="dev-row"><span>Particle size (px)</span><span id="dust-size-val">4</span></div>
+    <input class="dev-slider" type="range" id="dust-size" min="1" max="14" step="0.5" value="4">
+    <div class="dev-row"><span>Spread (°)</span><span id="dust-spread-val">130</span></div>
+    <input class="dev-slider" type="range" id="dust-spread" min="10" max="180" step="5" value="130">
+    <div class="dev-row"><span>Distance (px)</span><span id="dust-dist-val">36</span></div>
+    <input class="dev-slider" type="range" id="dust-dist" min="5" max="100" step="1" value="36">
+    <div class="dev-row"><span>Duration (s)</span><span id="dust-dur-val">0.40</span></div>
+    <input class="dev-slider" type="range" id="dust-dur" min="0.1" max="1.2" step="0.05" value="0.4">
+    <div class="dev-row"><span>Opacity</span><span id="dust-op-val">0.75</span></div>
+    <input class="dev-slider" type="range" id="dust-op" min="0" max="1" step="0.05" value="0.75">
+
   </div>
 
   <!-- ── LAYOUT TAB ── -->
@@ -1755,6 +1817,7 @@ void main(){
   const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchOn:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, fsTitle:88, fsSubtitle:14, fsDesc:19, lhDesc:1.75, fsNav:13, fsSectionTitle:42, fsBody:17,
     navBgOp:0.88, navBlur:14, navBorderOp:0.14, navBorderFade:20, navLinkColor:'#d8d0c4', navLinkHover:'#D4B483',
     galHeight:860, galSize:34, galSizeVar:8, galRotVar:12, galSizeSeed:42, galHoverScale:1.05,
+    dustEffectOn:true, dustTrigger:100, dustFiT:6, dustFiB:19, dustFiS:6, dustCount:9, dustSize:4, dustSpread:130, dustDist:36, dustDur:0.4, dustOp:0.75,
     trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
@@ -2045,6 +2108,33 @@ void main(){
           el.style.transform = 'rotate(' + r.toFixed(2) + 'deg)';
         });
       })(gs, gv, grv, gsd);
+      // dust
+      const dOn  = C.dustEffectOn ?? true;
+      const dFiT = C.dustFiT  ?? 6;
+      const dFiB = C.dustFiB  ?? 19;
+      const dFiS = C.dustFiS  ?? 6;
+      const dCnt = C.dustCount ?? 9;
+      const dSz  = C.dustSize  ?? 4;
+      const dSpr = C.dustSpread?? 130;
+      const dDst = C.dustDist  ?? 36;
+      const dDur = C.dustDur   ?? 0.4;
+      const dOp  = C.dustOp    ?? 0.75;
+      const dTrg = C.dustTrigger ?? 100;
+      document.getElementById('dust-effect-on').checked = dOn;
+      wv('dust-trigger', dTrg); wt('dust-trigger-val', dTrg);
+      wv('dust-fi-t', dFiT); wt('dust-fi-t-val', dFiT);
+      wv('dust-fi-b', dFiB); wt('dust-fi-b-val', dFiB);
+      wv('dust-fi-s', dFiS); wt('dust-fi-s-val', dFiS);
+      wv('dust-count', dCnt); wt('dust-count-val', dCnt);
+      wv('dust-size',  dSz);  wt('dust-size-val',  dSz);
+      wv('dust-spread',dSpr); wt('dust-spread-val', dSpr);
+      wv('dust-dist',  dDst); wt('dust-dist-val',  dDst);
+      wv('dust-dur',   dDur); wt('dust-dur-val',   dDur.toFixed(2));
+      wv('dust-op',    dOp);  wt('dust-op-val',    dOp.toFixed(2));
+      r.style.setProperty('--dust-fi-t', dFiT + '%');
+      r.style.setProperty('--dust-fi-b', dFiB + '%');
+      r.style.setProperty('--dust-fi-l', dFiS + '%');
+      r.style.setProperty('--dust-fi-r', dFiS + '%');
     }
     // layout
     { const r = document.documentElement;
@@ -2131,6 +2221,17 @@ void main(){
       galRotVar:     parseFloat(document.getElementById('gal-rot-var').value),
       galSizeSeed:   parseFloat(document.getElementById('gal-size-seed').value),
       galHoverScale: parseFloat(document.getElementById('gal-hover-scale').value),
+      dustEffectOn: document.getElementById('dust-effect-on').checked,
+      dustTrigger: parseFloat(document.getElementById('dust-trigger').value),
+      dustFiT:   parseFloat(document.getElementById('dust-fi-t').value),
+      dustFiB:   parseFloat(document.getElementById('dust-fi-b').value),
+      dustFiS:   parseFloat(document.getElementById('dust-fi-s').value),
+      dustCount: parseFloat(document.getElementById('dust-count').value),
+      dustSize:  parseFloat(document.getElementById('dust-size').value),
+      dustSpread:parseFloat(document.getElementById('dust-spread').value),
+      dustDist:  parseFloat(document.getElementById('dust-dist').value),
+      dustDur:   parseFloat(document.getElementById('dust-dur').value),
+      dustOp:    parseFloat(document.getElementById('dust-op').value),
       heroBgUrl:    document.getElementById('hbg-url').value,
       heroBgX:      parseFloat(document.getElementById('hbg-x').value),
       heroBgY:      parseFloat(document.getElementById('hbg-y').value),
@@ -2410,6 +2511,98 @@ void main(){
     document.getElementById('gal-hover-scale').addEventListener('input', e => {
       document.getElementById('gal-hover-scale-val').textContent = parseFloat(e.target.value).toFixed(2);
       r.style.setProperty('--gal-hover-scale', e.target.value);
+    });
+  })();
+
+  // gallery dust effect
+  (function(){
+    const r = document.documentElement;
+
+    function getDust() {
+      return {
+        on:      document.getElementById('dust-effect-on').checked,
+        trigger: parseFloat(document.getElementById('dust-trigger').value),
+        fiT:     parseFloat(document.getElementById('dust-fi-t').value),
+        fiB:     parseFloat(document.getElementById('dust-fi-b').value),
+        fiS:     parseFloat(document.getElementById('dust-fi-s').value),
+        count:   parseInt  (document.getElementById('dust-count').value),
+        size:    parseFloat(document.getElementById('dust-size').value),
+        spread:  parseFloat(document.getElementById('dust-spread').value),
+        dist:    parseFloat(document.getElementById('dust-dist').value),
+        dur:     parseFloat(document.getElementById('dust-dur').value),
+        op:      parseFloat(document.getElementById('dust-op').value),
+      };
+    }
+
+    function applyRingInset(d) {
+      r.style.setProperty('--dust-fi-t', d.fiT + '%');
+      r.style.setProperty('--dust-fi-b', d.fiB + '%');
+      r.style.setProperty('--dust-fi-l', d.fiS + '%');
+      r.style.setProperty('--dust-fi-r', d.fiS + '%');
+    }
+
+    function spawnDust(el) {
+      const d = getDust();
+
+      // ring
+      el.classList.remove('dust-settle');
+      void el.offsetWidth;
+      el.classList.add('dust-settle');
+      setTimeout(() => el.classList.remove('dust-settle'), d.dur * 1000 + 80);
+
+      // particles along the frame's bottom edge
+      const halfSpread = d.spread / 2;
+      for (let i = 0; i < d.count; i++) {
+        const p   = document.createElement('div');
+        p.className = 'dust-particle';
+        const pct = d.fiS + Math.random() * (100 - d.fiS * 2); // stay within frame sides
+        const ang = (-90 + (Math.random()-0.5) * halfSpread * 2) * Math.PI/180;
+        const dst = d.dist * 0.5 + Math.random() * d.dist * 0.5;
+        const dx  = (Math.cos(ang) * dst).toFixed(1) + 'px';
+        const dy  = (Math.sin(ang) * dst).toFixed(1) + 'px';
+        const sz  = (d.size * 0.5 + Math.random() * d.size * 0.5).toFixed(1);
+        const dur = (d.dur * 0.6 + Math.random() * d.dur * 0.4).toFixed(2);
+        const op  = (d.op  * 0.6 + Math.random() * d.op  * 0.4).toFixed(2);
+        p.style.cssText = `left:${pct.toFixed(1)}%;bottom:${d.fiB}%;width:${sz}px;height:${sz}px;--dp-dx:${dx};--dp-dy:${dy};--dp-dur:${dur}s;--dp-op:${op}`;
+        el.appendChild(p);
+        p.addEventListener('animationend', () => p.remove(), { once: true });
+      }
+    }
+
+    // slider listeners
+    document.getElementById('dust-trigger').addEventListener('input', e => {
+      document.getElementById('dust-trigger-val').textContent = e.target.value;
+    });
+    ['dust-fi-t','dust-fi-b','dust-fi-s'].forEach(id => {
+      document.getElementById(id).addEventListener('input', e => {
+        document.getElementById(id+'-val').textContent = e.target.value;
+        applyRingInset(getDust());
+      });
+    });
+    ['dust-count','dust-size','dust-spread','dust-dist'].forEach(id => {
+      document.getElementById(id).addEventListener('input', e => {
+        document.getElementById(id+'-val').textContent = e.target.value;
+      });
+    });
+    document.getElementById('dust-dur').addEventListener('input', e => {
+      document.getElementById('dust-dur-val').textContent = parseFloat(e.target.value).toFixed(2);
+    });
+    document.getElementById('dust-op').addEventListener('input', e => {
+      document.getElementById('dust-op-val').textContent = parseFloat(e.target.value).toFixed(2);
+    });
+
+    document.querySelectorAll('.gallery-item').forEach(el => {
+      let dustTimer = null;
+      el.addEventListener('mouseleave', () => {
+        const d = getDust();
+        if (!d.on) return;
+        const transDur = parseFloat(getComputedStyle(el).transitionDuration.split(',')[0]) * 1000;
+        const delay = transDur * (d.trigger / 100);
+        dustTimer = setTimeout(() => spawnDust(el), delay);
+      });
+      el.addEventListener('mouseenter', () => {
+        clearTimeout(dustTimer);
+      });
     });
   })();
 
