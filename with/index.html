@@ -869,7 +869,7 @@
     <button class="dev-tab active" data-tab="title">Title</button>
     <button class="dev-tab"        data-tab="dust">Dust</button>
     <button class="dev-tab"        data-tab="fog">Fog</button>
-    <button class="dev-tab"        data-tab="whisp">Whisp</button>
+    <button class="dev-tab"        data-tab="whisp">Screams</button>
     <button class="dev-tab"        data-tab="bgm">BGM</button>
   </div>
 
@@ -944,7 +944,7 @@
     <input type="color" id="fog-color" value="#1a0f04" style="width:100%;height:32px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px;margin-bottom:12px">
   </div>
 
-  <!-- ── WHISP TAB ── -->
+  <!-- ── SCREAMS TAB ── -->
   <div class="dev-pane" id="tab-whisp">
     <label class="dev-check"><span>Enable</span><input type="checkbox" id="whisp-on" checked></label>
     <div class="dev-row" style="margin-top:6px"><span>Color A</span><span>Color B</span></div>
@@ -976,7 +976,12 @@
     </div>
     <div class="dev-minmax-label"><span>min</span><span>max</span></div>
 
-    <div class="dev-section">Ghost</div>
+    <div class="dev-section" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Ghost</span>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:normal">
+        <input type="checkbox" id="whisp-ghost-on" checked style="accent-color:#D4B483"> on
+      </label>
+    </div>
     <div class="dev-row">Opacity</div>
     <div class="dev-minmax">
       <input type="number" id="whisp-gop-min" value="0.10" min="0" max="1" step="0.01">
@@ -996,7 +1001,12 @@
     </div>
     <div class="dev-minmax-label"><span>min</span><span>max</span></div>
 
-    <div class="dev-section">Flash</div>
+    <div class="dev-section" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Flash</span>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:normal">
+        <input type="checkbox" id="whisp-flash-on" checked style="accent-color:#D4B483"> on
+      </label>
+    </div>
     <div class="dev-row">Opacity</div>
     <div class="dev-minmax">
       <input type="number" id="whisp-fop-min" value="0.45" min="0" max="1" step="0.01">
@@ -1333,7 +1343,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, whispOn:true, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1498,6 +1508,8 @@ void main(){
     function wc(id, val){ document.getElementById(id).checked = val; }
     function wt(id, val){ document.getElementById(id).textContent = val; }
     wc('whisp-on',         C.whispOn       ?? true);
+    wc('whisp-ghost-on',   C.whispGhostOn  ?? true);
+    wc('whisp-flash-on',   C.whispFlashOn  ?? true);
     wv('whisp-color',      C.whispColor    ?? '#D4B483');
     wv('whisp-color2',     C.whispColor2   ?? '#D4B483');
     wv('whisp-font',       C.whispFont     ?? "'Jolly Lodger', cursive");
@@ -1518,6 +1530,8 @@ void main(){
       const W = window.WHISPERS;
       W.enabled  = C.whispOn       ?? true;
       W.color    = C.whispColor    ?? '#D4B483';
+      W.ghostOn  = C.whispGhostOn  ?? true;
+      W.flashOn  = C.whispFlashOn  ?? true;
       W.color2   = C.whispColor2   ?? '#D4B483';
       W.font     = C.whispFont     ?? "'Jolly Lodger', cursive";
       W.setColor && W.setColor(W.color);
@@ -1584,6 +1598,8 @@ void main(){
       bgmVolume:    parseFloat(document.getElementById('bgm-vol').value),
       bgmCrossfade: parseFloat(document.getElementById('bgm-cf').value),
       whispOn:       document.getElementById('whisp-on').checked,
+      whispGhostOn:  document.getElementById('whisp-ghost-on').checked,
+      whispFlashOn:  document.getElementById('whisp-flash-on').checked,
       whispColor:    document.getElementById('whisp-color').value,
       whispColor2:   document.getElementById('whisp-color2').value,
       whispFont:     document.getElementById('whisp-font').value,
@@ -1710,6 +1726,8 @@ void main(){
 
   // whisper controls
   document.getElementById('whisp-on').addEventListener('change', e => { window.WHISPERS.enabled = e.target.checked; });
+  document.getElementById('whisp-ghost-on').addEventListener('change', e => { window.WHISPERS.ghostOn = e.target.checked; });
+  document.getElementById('whisp-flash-on').addEventListener('change', e => { window.WHISPERS.flashOn = e.target.checked; });
   document.getElementById('whisp-color').addEventListener('input', e => {
     window.WHISPERS.color = e.target.value;
     window.WHISPERS.setColor && window.WHISPERS.setColor(e.target.value);
@@ -2155,6 +2173,8 @@ void main(){
 
   window.WHISPERS = {
     enabled:      true,
+    ghostOn:      true,
+    flashOn:      true,
     color:        '#D4B483',
     color2:       '#D4B483',
     font:         "'Jolly Lodger', cursive",
@@ -2231,7 +2251,11 @@ void main(){
 
       const WS  = window.WHISPERS;
       const W   = hero.offsetWidth, H = hero.offsetHeight;
-      const line = LINES[Math.floor(Math.random() * LINES.length)];
+      const pool = LINES.filter(l =>
+        (l.type === 'ghost' && WS.ghostOn) || (l.type === 'flash' && WS.flashOn)
+      );
+      if(!pool.length){ setTimeout(cycle, 500); return; }
+      const line = pool[Math.floor(Math.random() * pool.length)];
       let pos = null;
       for(let t = 0; t < 10; t++){
         const c = spawnPos(W, H);
