@@ -432,12 +432,11 @@
       .gallery-item { background-image: url('shot1.jpg'); background-size: cover; background-position: center; }
     */
     .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 36px;
+      position: relative;
+      min-height: var(--gal-height, 860px);
       max-width: 1100px;
       margin: 0 auto;
-      padding: 24px 60px 56px;
+      padding: 40px 60px 100px;
       overflow: visible;
     }
 
@@ -445,7 +444,8 @@
       background: transparent;
       overflow: visible;
       cursor: pointer;
-      position: relative;
+      position: absolute;
+      width: 34%;
       padding: 0;
       aspect-ratio: 981 / 872;
       filter: drop-shadow(3px 6px 18px rgba(0,0,0,0.75));
@@ -472,15 +472,15 @@
       z-index: 2;
     }
 
-    .gallery-item:nth-child(1) { transform: rotate(-2deg); }
-    .gallery-item:nth-child(2) { transform: rotate(1.5deg); }
-    .gallery-item:nth-child(3) { transform: rotate(-1.5deg); }
-    .gallery-item:nth-child(4) { transform: rotate(2deg); }
-    .gallery-item:nth-child(5) { transform: rotate(-1deg); }
-    .gallery-item:nth-child(6) { transform: rotate(1deg); }
+    .gallery-item:nth-child(1) { left:var(--gal-1-x,1%);  top:var(--gal-1-y,2%);  z-index:3; }
+    .gallery-item:nth-child(2) { left:var(--gal-2-x,33%); top:var(--gal-2-y,-1%); z-index:2; }
+    .gallery-item:nth-child(3) { left:var(--gal-3-x,62%); top:var(--gal-3-y,6%);  z-index:1; }
+    .gallery-item:nth-child(4) { left:var(--gal-4-x,5%);  top:var(--gal-4-y,48%); z-index:1; }
+    .gallery-item:nth-child(5) { left:var(--gal-5-x,35%); top:var(--gal-5-y,52%); z-index:3; }
+    .gallery-item:nth-child(6) { left:var(--gal-6-x,63%); top:var(--gal-6-y,45%); z-index:2; }
 
     .gallery-item:hover {
-      transform: rotate(0deg) translateY(-10px) scale(1.03) !important;
+      transform: rotate(0deg) translateY(-10px) scale(var(--gal-hover-scale, 1.05)) !important;
       filter: drop-shadow(6px 18px 32px rgba(0,0,0,0.92));
       z-index: 10;
     }
@@ -1166,6 +1166,7 @@
     <button class="dev-tab"        data-tab="layout">Layout</button>
     <button class="dev-tab"        data-tab="nav">Nav</button>
     <button class="dev-tab"        data-tab="type">Type</button>
+    <button class="dev-tab"        data-tab="gallery">Gallery</button>
   </div>
 
   <!-- ── TITLE TAB ── -->
@@ -1390,6 +1391,29 @@
     <div class="dev-row"><span>Hover color</span></div>
     <input type="color" id="nav-link-hover" value="#D4B483"
       style="width:100%;height:28px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px;margin-bottom:10px">
+
+  </div>
+
+  <!-- ── GALLERY TAB ── -->
+  <div class="dev-pane" id="tab-gallery">
+
+    <div class="dev-section">Container</div>
+    <div class="dev-row"><span>Height (px)</span><span id="gal-height-val">860</span></div>
+    <input class="dev-slider" type="range" id="gal-height" min="400" max="1400" step="20" value="860">
+
+    <div class="dev-section">Photos</div>
+    <div class="dev-row"><span>Base size (%)</span><span id="gal-size-val">34</span></div>
+    <input class="dev-slider" type="range" id="gal-size" min="15" max="55" step="1" value="34">
+    <div class="dev-row"><span>Size variance (%)</span><span id="gal-size-var-val">8</span></div>
+    <input class="dev-slider" type="range" id="gal-size-var" min="0" max="20" step="1" value="8">
+    <div class="dev-row"><span>Rotation variance (°)</span><span id="gal-rot-var-val">12</span></div>
+    <input class="dev-slider" type="range" id="gal-rot-var" min="0" max="30" step="0.5" value="12">
+    <div class="dev-row"><span>Seed</span><span id="gal-size-seed-val">42</span></div>
+    <input class="dev-slider" type="range" id="gal-size-seed" min="0" max="999" step="1" value="42">
+
+    <div class="dev-section">Hover</div>
+    <div class="dev-row"><span>Zoom scale</span><span id="gal-hover-scale-val">1.05</span></div>
+    <input class="dev-slider" type="range" id="gal-hover-scale" min="1" max="1.5" step="0.01" value="1.05">
 
   </div>
 
@@ -1729,7 +1753,9 @@ void main(){
 <script>
 (function(){
   const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchOn:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, fsTitle:88, fsSubtitle:14, fsDesc:19, lhDesc:1.75, fsNav:13, fsSectionTitle:42, fsBody:17,
-    navBgOp:0.88, navBlur:14, navBorderOp:0.14, navBorderFade:20, navLinkColor:'#d8d0c4', navLinkHover:'#D4B483', trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+    navBgOp:0.88, navBlur:14, navBorderOp:0.14, navBorderFade:20, navLinkColor:'#d8d0c4', navLinkHover:'#D4B483',
+    galHeight:860, galSize:34, galSizeVar:8, galRotVar:12, galSizeSeed:42, galHoverScale:1.05,
+    trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1992,6 +2018,34 @@ void main(){
       r.style.setProperty('--nav-link-hover', nlh);
       r.style.setProperty('--fs-nav',         nfs + 'px');
     }
+    // gallery
+    { const r = document.documentElement;
+      const gh  = C.galHeight     ?? 860;
+      const gs  = C.galSize       ?? 34;
+      const gv  = C.galSizeVar    ?? 8;
+      const grv = C.galRotVar     ?? 12;
+      const gsd = C.galSizeSeed   ?? 42;
+      const ghs = C.galHoverScale ?? 1.05;
+      wv('gal-height', gh);          wt('gal-height-val', gh);
+      wv('gal-size', gs);            wt('gal-size-val', gs);
+      wv('gal-size-var', gv);        wt('gal-size-var-val', gv);
+      wv('gal-rot-var', grv);        wt('gal-rot-var-val', grv);
+      wv('gal-size-seed', gsd);      wt('gal-size-seed-val', gsd);
+      wv('gal-hover-scale', ghs);    wt('gal-hover-scale-val', ghs.toFixed(2));
+      r.style.setProperty('--gal-height',      gh + 'px');
+      r.style.setProperty('--gal-hover-scale', ghs);
+      // deterministic random sizes
+      (function applyGalLayout(base, sVar, rVar, seed){
+        function mkRand(s){ s=s>>>0; return ()=>{ s=(Math.imul(1664525,s)+1013904223)>>>0; return s/0x100000000; }; }
+        const rand = mkRand(seed);
+        document.querySelectorAll('.gallery-item').forEach(el => {
+          const w = base + (rand()*2-1)*sVar;
+          const r = (rand()*2-1)*rVar;
+          el.style.width = w.toFixed(1) + '%';
+          el.style.transform = 'rotate(' + r.toFixed(2) + 'deg)';
+        });
+      })(gs, gv, grv, gsd);
+    }
     // layout
     { const r = document.documentElement;
       const url = C.heroBgUrl ?? 'Screenshot_4.png';
@@ -2071,6 +2125,12 @@ void main(){
       fsNav:        parseFloat(document.getElementById('fs-nav2').value),
       navLinkColor: document.getElementById('nav-link-color').value,
       navLinkHover: document.getElementById('nav-link-hover').value,
+      galHeight:     parseFloat(document.getElementById('gal-height').value),
+      galSize:       parseFloat(document.getElementById('gal-size').value),
+      galSizeVar:    parseFloat(document.getElementById('gal-size-var').value),
+      galRotVar:     parseFloat(document.getElementById('gal-rot-var').value),
+      galSizeSeed:   parseFloat(document.getElementById('gal-size-seed').value),
+      galHoverScale: parseFloat(document.getElementById('gal-hover-scale').value),
       heroBgUrl:    document.getElementById('hbg-url').value,
       heroBgX:      parseFloat(document.getElementById('hbg-x').value),
       heroBgY:      parseFloat(document.getElementById('hbg-y').value),
@@ -2307,6 +2367,49 @@ void main(){
         document.getElementById(id + '-val').textContent = e.target.value + 'px';
         r.style.setProperty('--' + id, e.target.value + 'px');
       });
+    });
+  })();
+
+  // gallery controls
+  (function(){
+    const r = document.documentElement;
+    function mkRand(s){ s=s>>>0; return ()=>{ s=(Math.imul(1664525,s)+1013904223)>>>0; return s/0x100000000; }; }
+    function applyGalSizes(){
+      const base = parseFloat(document.getElementById('gal-size').value);
+      const sVar = parseFloat(document.getElementById('gal-size-var').value);
+      const rVar = parseFloat(document.getElementById('gal-rot-var').value);
+      const seed = parseInt(document.getElementById('gal-size-seed').value);
+      const rand = mkRand(seed);
+      document.querySelectorAll('.gallery-item').forEach(el => {
+        const w = base + (rand()*2-1)*sVar;
+        const r = (rand()*2-1)*rVar;
+        el.style.width = w.toFixed(1) + '%';
+        el.style.transform = 'rotate(' + r.toFixed(2) + 'deg)';
+      });
+    }
+    document.getElementById('gal-height').addEventListener('input', e => {
+      document.getElementById('gal-height-val').textContent = e.target.value;
+      r.style.setProperty('--gal-height', e.target.value + 'px');
+    });
+    document.getElementById('gal-size').addEventListener('input', e => {
+      document.getElementById('gal-size-val').textContent = e.target.value;
+      applyGalSizes();
+    });
+    document.getElementById('gal-size-var').addEventListener('input', e => {
+      document.getElementById('gal-size-var-val').textContent = e.target.value;
+      applyGalSizes();
+    });
+    document.getElementById('gal-rot-var').addEventListener('input', e => {
+      document.getElementById('gal-rot-var-val').textContent = e.target.value;
+      applyGalSizes();
+    });
+    document.getElementById('gal-size-seed').addEventListener('input', e => {
+      document.getElementById('gal-size-seed-val').textContent = e.target.value;
+      applyGalSizes();
+    });
+    document.getElementById('gal-hover-scale').addEventListener('input', e => {
+      document.getElementById('gal-hover-scale-val').textContent = parseFloat(e.target.value).toFixed(2);
+      r.style.setProperty('--gal-hover-scale', e.target.value);
     });
   })();
 
