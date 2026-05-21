@@ -956,36 +956,172 @@
 
 <!-- ═══ DEV MENU ══════════════════════════════════════════ -->
 <style>
-#dev-panel { display:none;position:fixed;bottom:56px;right:20px;z-index:9998;width:260px;background:#0c0b0a;border:1px solid rgba(212,180,131,0.18);font-family:'Crimson Pro',Georgia,serif;color:#c8c0b0;box-shadow:0 8px 40px rgba(0,0,0,0.8); }
-.dev-tabs { display:flex;border-bottom:1px solid rgba(212,180,131,0.12); }
-.dev-tab { flex:1;padding:9px 0;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;text-align:center;cursor:pointer;color:rgba(212,180,131,0.35);border:none;background:none;font-family:monospace;transition:color 0.15s; }
-.dev-tab:hover { color:rgba(212,180,131,0.7); }
-.dev-tab.active { color:#D4B483;border-bottom:1px solid #D4B483;margin-bottom:-1px; }
-.dev-pane { display:none;padding:16px 18px;overflow-y:auto;max-height:min(420px,60vh); }
-.dev-pane.active { display:block; }
-.dev-pane::-webkit-scrollbar { width:3px; }
-.dev-pane::-webkit-scrollbar-thumb { background:rgba(212,180,131,0.2);border-radius:2px; }
-.dev-section { font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,180,131,0.35);margin:14px 0 8px;padding-top:10px;border-top:1px solid rgba(212,180,131,0.07); }
-.dev-section:first-child { margin-top:0;padding-top:0;border-top:none; }
-.dev-row { display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px; }
-.dev-row span:last-child { color:#D4B483; }
-.dev-slider { width:100%;accent-color:#D4B483;margin-bottom:12px;display:block; }
-.dev-check { display:flex;align-items:center;justify-content:space-between;font-size:13px;cursor:pointer;margin-bottom:12px; }
-.dev-check input { accent-color:#D4B483;width:14px;height:14px;cursor:pointer; }
-.dev-footer { display:flex;gap:6px;padding:10px 18px;border-top:1px solid rgba(212,180,131,0.1); }
-.dev-btn { flex:1;padding:7px 4px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;font-family:monospace;border:1px solid rgba(212,180,131,0.2);background:transparent;color:rgba(212,180,131,0.5);transition:all 0.15s; }
-.dev-btn:hover { border-color:rgba(212,180,131,0.7);color:rgba(212,180,131,0.9); }
-.dev-btn.primary { background:rgba(212,180,131,0.08);border-color:rgba(212,180,131,0.4);color:rgba(212,180,131,0.85); }
-.dev-btn.primary:hover { background:rgba(212,180,131,0.16);border-color:rgba(212,180,131,0.8); }
-.dev-minmax { display:flex;gap:5px;margin:3px 0 1px }
-.dev-minmax input { flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(212,180,131,0.18);color:#c8c0b0;font-family:monospace;font-size:11px;padding:4px 3px;text-align:center;width:0;-moz-appearance:textfield;border-radius:2px }
-.dev-minmax input:focus { outline:none;border-color:rgba(212,180,131,0.5) }
-.dev-minmax input::-webkit-inner-spin-button,.dev-minmax input::-webkit-outer-spin-button { -webkit-appearance:none }
-.dev-minmax-label { display:flex;gap:5px;margin-bottom:9px;font-size:9px;color:rgba(212,180,131,0.3);letter-spacing:1px;text-transform:uppercase }
-.dev-minmax-label span { flex:1;text-align:center }
+/* panel shell */
+#dev-panel {
+  display: none;
+  position: fixed;
+  bottom: 64px;
+  right: 20px;
+  z-index: 9998;
+  width: 300px;
+  background: #0e0c0b;
+  border: 1px solid rgba(212,180,131,0.22);
+  font-family: 'Inter', sans-serif;
+  color: #d8d0c4;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.9);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* tab bar — two rows so 6 tabs never crowd */
+.dev-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(212,180,131,0.12);
+  background: rgba(0,0,0,0.3);
+}
+.dev-tab {
+  flex: 1 1 33%;          /* max 3 per row */
+  min-width: 0;
+  padding: 10px 4px;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  color: rgba(212,180,131,0.45);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  transition: color .15s, border-color .15s, background .15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dev-tab:hover  { color: rgba(212,180,131,0.8); background: rgba(212,180,131,0.05); }
+.dev-tab:focus-visible { outline: 2px solid rgba(212,180,131,0.6); outline-offset: -2px; }
+.dev-tab.active { color: #D4B483; border-bottom-color: #D4B483; background: rgba(212,180,131,0.06); }
+
+/* pane */
+.dev-pane { display:none; padding: 16px 18px; overflow-y: auto; max-height: min(480px, 65vh); }
+.dev-pane.active { display: block; }
+.dev-pane::-webkit-scrollbar { width: 4px; }
+.dev-pane::-webkit-scrollbar-thumb { background: rgba(212,180,131,0.25); border-radius: 2px; }
+
+/* section header */
+.dev-section {
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(212,180,131,0.5);
+  margin: 18px 0 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(212,180,131,0.1);
+  font-weight: 600;
+}
+.dev-section:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+/* label + value row */
+.dev-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: rgba(216,208,196,0.8);
+}
+.dev-row span:last-child { color: #D4B483; font-variant-numeric: tabular-nums; }
+
+/* sliders */
+.dev-slider {
+  width: 100%;
+  accent-color: #D4B483;
+  margin-bottom: 14px;
+  display: block;
+  height: 18px;   /* larger touch target */
+  cursor: pointer;
+}
+.dev-slider:focus-visible { outline: 2px solid rgba(212,180,131,0.6); border-radius: 2px; }
+.dev-slider:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* checkboxes */
+.dev-check {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  cursor: pointer;
+  margin-bottom: 12px;
+  color: rgba(216,208,196,0.8);
+  user-select: none;
+}
+.dev-check input {
+  accent-color: #D4B483;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.dev-check input:focus-visible { outline: 2px solid rgba(212,180,131,0.6); }
+
+/* footer buttons */
+.dev-footer { display:flex; gap:6px; padding: 10px 18px; border-top: 1px solid rgba(212,180,131,0.1); }
+.dev-btn {
+  flex: 1;
+  padding: 9px 4px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  border: 1px solid rgba(212,180,131,0.25);
+  background: transparent;
+  color: rgba(212,180,131,0.6);
+  border-radius: 2px;
+  transition: all .15s;
+}
+.dev-btn:hover { border-color: rgba(212,180,131,0.7); color: rgba(212,180,131,0.95); background: rgba(212,180,131,0.06); }
+.dev-btn:focus-visible { outline: 2px solid rgba(212,180,131,0.6); }
+.dev-btn.primary { background: rgba(212,180,131,0.1); border-color: rgba(212,180,131,0.45); color: rgba(212,180,131,0.9); }
+.dev-btn.primary:hover { background: rgba(212,180,131,0.18); border-color: rgba(212,180,131,0.85); }
+
+/* min/max number pairs */
+.dev-minmax { display:flex; gap:6px; margin: 4px 0 2px; }
+.dev-minmax input {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(212,180,131,0.2);
+  color: #d8d0c4;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  padding: 6px 4px;
+  text-align: center;
+  width: 0;
+  -moz-appearance: textfield;
+  border-radius: 2px;
+}
+.dev-minmax input:focus { outline: none; border-color: rgba(212,180,131,0.6); }
+.dev-minmax input::-webkit-inner-spin-button,
+.dev-minmax input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.dev-minmax-label {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 10px;
+  color: rgba(212,180,131,0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.dev-minmax-label span { flex: 1; text-align: center; }
 </style>
 
-<button id="dev-toggle" title="Dev menu" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#0a0a0a;border:1px solid rgba(212,180,131,0.3);color:rgba(212,180,131,0.5);font-size:11px;letter-spacing:1.5px;padding:6px 10px;cursor:pointer;font-family:monospace;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(212,180,131,0.8)';this.style.color='rgba(212,180,131,1)'" onmouseout="this.style.borderColor='rgba(212,180,131,0.3)';this.style.color='rgba(212,180,131,0.5)'">DEV</button>
+<button id="dev-toggle" title="Dev menu" aria-label="Open dev panel"
+  style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#0e0c0b;border:1px solid rgba(212,180,131,0.35);color:rgba(212,180,131,0.65);font-size:11px;letter-spacing:1.8px;padding:8px 13px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;transition:all 0.2s;border-radius:3px"
+  onmouseover="this.style.borderColor='rgba(212,180,131,0.85)';this.style.color='rgba(212,180,131,1)'"
+  onmouseout="this.style.borderColor='rgba(212,180,131,0.35)';this.style.color='rgba(212,180,131,0.65)'">DEV</button>
 
 <div id="dev-panel">
   <!-- Tab bar -->
