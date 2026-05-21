@@ -2936,6 +2936,11 @@ void main(){
     a.download = 'config.json'; a.click();
   }
 
+  // ── dev panel: local-only ──
+  if (!/^(localhost|127\.|0\.0\.0\.0|::1)/.test(location.hostname)) {
+    document.getElementById('dev-toggle').style.display = 'none';
+  }
+
   // ── dev panel toggle ──
   document.getElementById('dev-toggle').addEventListener('click', async () => {
     const p = document.getElementById('dev-panel');
