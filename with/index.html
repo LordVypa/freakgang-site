@@ -43,9 +43,23 @@
       background: rgba(6,3,1,var(--nav-bg-op, 0.88));
       backdrop-filter: blur(var(--nav-blur, 14px));
       -webkit-backdrop-filter: blur(var(--nav-blur, 14px));
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.3s;
     }
+    nav::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(212,180,131,var(--nav-border-op, 0.14)) var(--nav-border-fade, 20%),
+        rgba(212,180,131,var(--nav-border-op, 0.14)) calc(100% - var(--nav-border-fade, 20%)),
+        transparent 100%
+      );
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    nav.scrolled::after { opacity: 1; }
 
     .nav-logo {
       font-family: 'Jolly Lodger', cursive;
@@ -1351,6 +1365,8 @@
     <input class="dev-slider" type="range" id="nav-blur" min="0" max="40" step="1" value="14">
     <div class="dev-row"><span>Border opacity</span><span id="nav-border-op-val">0.14</span></div>
     <input class="dev-slider" type="range" id="nav-border-op" min="0" max="1" step="0.02" value="0.14">
+    <div class="dev-row"><span>Border fade width (%)</span><span id="nav-border-fade-val">20</span></div>
+    <input class="dev-slider" type="range" id="nav-border-fade" min="0" max="50" step="1" value="20">
 
     <div class="dev-section">Links</div>
     <div class="dev-row"><span>Font size</span><span id="fs-nav-val2">13px</span></div>
@@ -1551,10 +1567,7 @@ void main(){
   window.addEventListener('scroll', ()=>{
     const max=document.documentElement.scrollHeight-window.innerHeight;
     tScroll = max>0 ? window.scrollY/max : 0;
-    const bOp = getComputedStyle(document.documentElement).getPropertyValue('--nav-border-op').trim() || '0.14';
-    navEl.style.borderBottomColor = window.scrollY > 10
-      ? `rgba(212,180,131,${bOp})`
-      : 'transparent';
+    navEl.classList.toggle('scrolled', window.scrollY > 10);
   });
 
   let lastT=0;
@@ -1703,7 +1716,7 @@ void main(){
 <script>
 (function(){
   const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchOn:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, fsTitle:88, fsSubtitle:14, fsDesc:19, lhDesc:1.75, fsNav:13, fsSectionTitle:42, fsBody:17,
-    navBgOp:0.88, navBlur:14, navBorderOp:0.14, navLinkColor:'#d8d0c4', navLinkHover:'#D4B483', trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+    navBgOp:0.88, navBlur:14, navBorderOp:0.14, navBorderFade:20, navLinkColor:'#d8d0c4', navLinkHover:'#D4B483', trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1947,13 +1960,16 @@ void main(){
     { const r = document.documentElement;
       const nbg  = C.navBgOp     ?? 0.88;
       const nbl  = C.navBlur     ?? 14;
-      const nbor = C.navBorderOp ?? 0.14;
-      wv('nav-bg-op',     nbg);  wt('nav-bg-op-val',     parseFloat(nbg).toFixed(2));
-      wv('nav-blur',      nbl);  wt('nav-blur-val',       nbl);
-      wv('nav-border-op', nbor); wt('nav-border-op-val', parseFloat(nbor).toFixed(2));
-      r.style.setProperty('--nav-bg-op',     nbg);
-      r.style.setProperty('--nav-blur',      nbl + 'px');
-      r.style.setProperty('--nav-border-op', nbor);
+      const nbor  = C.navBorderOp   ?? 0.14;
+      const nfade = C.navBorderFade ?? 20;
+      wv('nav-bg-op',       nbg);   wt('nav-bg-op-val',     parseFloat(nbg).toFixed(2));
+      wv('nav-blur',        nbl);   wt('nav-blur-val',       nbl);
+      wv('nav-border-op',   nbor);  wt('nav-border-op-val', parseFloat(nbor).toFixed(2));
+      wv('nav-border-fade', nfade); wt('nav-border-fade-val', nfade);
+      r.style.setProperty('--nav-bg-op',       nbg);
+      r.style.setProperty('--nav-blur',        nbl + 'px');
+      r.style.setProperty('--nav-border-op',   nbor);
+      r.style.setProperty('--nav-border-fade', nfade + '%');
       const nlc  = C.navLinkColor ?? '#d8d0c4';
       const nlh  = C.navLinkHover ?? '#D4B483';
       const nfs  = C.fsNav        ?? 13;
@@ -2038,6 +2054,7 @@ void main(){
       navBgOp:      parseFloat(document.getElementById('nav-bg-op').value),
       navBlur:      parseFloat(document.getElementById('nav-blur').value),
       navBorderOp:  parseFloat(document.getElementById('nav-border-op').value),
+      navBorderFade: parseFloat(document.getElementById('nav-border-fade').value),
       fsNav:        parseFloat(document.getElementById('fs-nav2').value),
       navLinkColor: document.getElementById('nav-link-color').value,
       navLinkHover: document.getElementById('nav-link-hover').value,
@@ -2306,7 +2323,10 @@ void main(){
       const v = parseFloat(e.target.value).toFixed(2);
       document.getElementById('nav-border-op-val').textContent = v;
       r.style.setProperty('--nav-border-op', e.target.value);
-      if(window.scrollY > 10) nav.style.borderBottomColor = `rgba(212,180,131,${e.target.value})`;
+    });
+    document.getElementById('nav-border-fade').addEventListener('input', e => {
+      document.getElementById('nav-border-fade-val').textContent = e.target.value;
+      r.style.setProperty('--nav-border-fade', e.target.value + '%');
     });
   })();
 
