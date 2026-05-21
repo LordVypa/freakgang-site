@@ -221,8 +221,31 @@
 
     .btn-wishlist:hover::before { transform: translateX(0); }
     .btn-wishlist:hover { color: #000; }
-    .btn-wishlist span, .btn-wishlist svg { position: relative; z-index: 1; }
+    .btn-wishlist span, .btn-wishlist svg, .btn-wishlist img { position: relative; z-index: 1; }
     .btn-wishlist svg { width: 16px; height: 16px; }
+    .btn-wishlist .steam-icon {
+      width: var(--steam-icon-size, 20px); height: var(--steam-icon-size, 20px);
+      object-fit: contain;
+      /* color set via JS as background-color on a mask wrapper — see below */
+      transition: opacity 0.25s;
+    }
+    /* icon tinting via CSS mask so we can use real hex colors */
+    .steam-icon-wrap {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: var(--steam-icon-size, 20px); height: var(--steam-icon-size, 20px);
+      position: relative; z-index: 1; flex-shrink: 0;
+    }
+    .steam-icon-wrap::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-color: var(--steam-icon-color, #d4b483);
+      -webkit-mask: var(--steam-icon-mask) no-repeat center / contain;
+      mask: var(--steam-icon-mask) no-repeat center / contain;
+      transition: background-color 0.25s;
+    }
+    .btn-wishlist:hover .steam-icon-wrap::before {
+      background-color: var(--steam-icon-hover-color, #000);
+    }
 
     .scroll-hint {
       position: absolute;
@@ -894,9 +917,7 @@
       taking you through its deceptive past and bone-chilling revelations.
     </p>
     <a href="https://store.steampowered.com" class="btn-wishlist">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-      </svg>
+      <span class="steam-icon-wrap"></span>
       <span>Wishlist on Steam</span>
     </a>
   </div>
@@ -966,9 +987,7 @@
   <h2 class="footer-title">Don't Go In Alone.</h2>
   <p class="footer-sub">Wishlist now and be the first to know when the halls open.</p>
   <a href="https://store.steampowered.com" class="btn-wishlist">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-    </svg>
+    <span class="steam-icon-wrap"></span>
     <span>Wishlist on Steam</span>
   </a>
   <div class="social-links">
@@ -1044,7 +1063,6 @@
     if (qs('.hero-title')) qs('.hero-title').textContent = C.heroTitle;
     if (qs('.hero-desc')) qs('.hero-desc').innerHTML = C.heroDesc;
     if (qs('.hero-content .btn-wishlist')) {
-      qs('.hero-content .btn-wishlist span').textContent = C.heroCta;
       qs('.hero-content .btn-wishlist').href = C.heroCtaUrl;
     }
     // trailer
@@ -1059,7 +1077,6 @@
     if (qs('.footer-title')) qs('.footer-title').textContent = C.footerTitle;
     if (qs('.footer-sub')) qs('.footer-sub').textContent = C.footerSub;
     if (qs('.footer-cta .btn-wishlist')) {
-      qs('.footer-cta .btn-wishlist span').textContent = C.footerCta;
       qs('.footer-cta .btn-wishlist').href = C.footerCtaUrl;
     }
     document.querySelectorAll('.social-link').forEach((a, i) => {
@@ -1519,6 +1536,14 @@
     <div class="dev-row"><span>Body text</span><span id="fs-body-val">17px</span></div>
     <input class="dev-slider" type="range" id="fs-body" min="12" max="26" step="1" value="17">
 
+    <div class="dev-section">Wishlist Button</div>
+    <div class="dev-row"><span>Steam icon size</span><span id="steam-icon-size-val">20px</span></div>
+    <input class="dev-slider" type="range" id="steam-icon-size" min="12" max="40" step="1" value="20">
+    <div class="dev-row"><span>Icon color</span></div>
+    <input type="color" id="steam-icon-color" value="#d4b483" style="width:100%;height:32px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px;margin-bottom:4px">
+    <div class="dev-row"><span>Hover color</span></div>
+    <input type="color" id="steam-icon-hover-color" value="#000000" style="width:100%;height:32px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px;margin-bottom:4px">
+
   </div>
 
   <!-- ── NAV TAB ── -->
@@ -1931,6 +1956,7 @@ void main(){
 <script>
 (function(){
   const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchOn:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, fsTitle:88, fsSubtitle:14, fsDesc:19, lhDesc:1.75, fsNav:13, fsSectionTitle:42, fsBody:17,
+    steamIconSize:20, steamIconColor:'#d4b483', steamIconHoverColor:'#000000',
     navBgOp:0.88, navBlur:14, navBorderOp:0.14, navBorderFade:20, navLinkColor:'#d8d0c4', navLinkHover:'#D4B483',
     galHeight:860, galSize:34, galSizeVar:8, galRotVar:12, galSizeSeed:42, galHoverScale:1.05,
     dustEffectOn:true, dustTrigger:100, dustFiT:6, dustFiB:19, dustFiS:6, dustCount:9, dustSize:4, dustSpread:130, dustDist:36, dustDur:0.4, dustOp:0.75,
@@ -2173,6 +2199,17 @@ void main(){
         wv(id, v); wt(id + '-val', v + (unit || ''));
         r.style.setProperty('--' + id, v + (unit || ''));
       });
+      // steam icon
+      r.style.setProperty('--steam-icon-mask', "url('steam.png')");
+      const siSize  = C.steamIconSize        ?? 20;
+      const siCol   = C.steamIconColor       ?? '#d4b483';
+      const siHover = C.steamIconHoverColor  ?? '#000000';
+      wv('steam-icon-size', siSize); wt('steam-icon-size-val', siSize + 'px');
+      document.getElementById('steam-icon-color').value       = siCol;
+      document.getElementById('steam-icon-hover-color').value = siHover;
+      r.style.setProperty('--steam-icon-size',        siSize + 'px');
+      r.style.setProperty('--steam-icon-color',       siCol);
+      r.style.setProperty('--steam-icon-hover-color', siHover);
     }
     // nav visuals
     { const r = document.documentElement;
@@ -2324,6 +2361,9 @@ void main(){
       lhDesc:        parseFloat(document.getElementById('lh-desc').value),
       fsSectionTitle:parseFloat(document.getElementById('fs-section-title').value),
       fsBody:        parseFloat(document.getElementById('fs-body').value),
+      steamIconSize: parseFloat(document.getElementById('steam-icon-size').value),
+      steamIconColor: document.getElementById('steam-icon-color').value,
+      steamIconHoverColor: document.getElementById('steam-icon-hover-color').value,
       navBgOp:      parseFloat(document.getElementById('nav-bg-op').value),
       navBlur:      parseFloat(document.getElementById('nav-blur').value),
       navBorderOp:  parseFloat(document.getElementById('nav-border-op').value),
@@ -2584,6 +2624,23 @@ void main(){
         document.getElementById(id + '-val').textContent = e.target.value + 'px';
         r.style.setProperty('--' + id, e.target.value + 'px');
       });
+    });
+
+    // steam icon mask (set once so CSS mask: var() works)
+    r.style.setProperty('--steam-icon-mask', "url('steam.png')");
+
+    // steam icon size
+    document.getElementById('steam-icon-size').addEventListener('input', e => {
+      document.getElementById('steam-icon-size-val').textContent = e.target.value + 'px';
+      r.style.setProperty('--steam-icon-size', e.target.value + 'px');
+    });
+    // steam icon color
+    document.getElementById('steam-icon-color').addEventListener('input', e => {
+      r.style.setProperty('--steam-icon-color', e.target.value);
+    });
+    // steam icon hover color
+    document.getElementById('steam-icon-hover-color').addEventListener('input', e => {
+      r.style.setProperty('--steam-icon-hover-color', e.target.value);
     });
   })();
 
