@@ -871,6 +871,7 @@
     <button class="dev-tab"        data-tab="dust">Dust</button>
     <button class="dev-tab"        data-tab="fog">Fog</button>
     <button class="dev-tab"        data-tab="whisp">Whisp</button>
+    <button class="dev-tab"        data-tab="bgm">BGM</button>
   </div>
 
   <!-- ── TITLE TAB ── -->
@@ -1015,6 +1016,18 @@
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-right"  checked style="accent-color:#D4B483"> Right</label>
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-top"    checked style="accent-color:#D4B483"> Top</label>
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="whisp-edge-bottom" checked style="accent-color:#D4B483"> Bottom</label>
+    </div>
+  </div>
+
+  <!-- ── BGM TAB ── -->
+  <div class="dev-pane" id="tab-bgm">
+    <label class="dev-check"><span>Enable</span><input type="checkbox" id="bgm-on" checked></label>
+    <div class="dev-row"><span>Volume</span><span id="bgm-vol-val">0.50</span></div>
+    <input class="dev-slider" type="range" id="bgm-vol" min="0" max="1" step="0.01" value="0.50">
+    <div class="dev-row"><span>Crossfade</span><span id="bgm-cf-val">3.0s</span></div>
+    <input class="dev-slider" type="range" id="bgm-cf" min="0.5" max="8" step="0.5" value="3">
+    <div class="dev-row" style="margin-top:4px;font-size:11px;color:rgba(212,180,131,0.3);font-style:italic">
+      <span>Crossfade smooths the loop point</span>
     </div>
   </div>
 
@@ -1306,7 +1319,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, whispOn:true, whispColor:'#D4B483', whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, whispOn:true, whispColor:'#D4B483', whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1507,6 +1520,18 @@ void main(){
     document.getElementById('scratch-tex').value            = st;
     document.getElementById('scratch-tex-val').textContent  = parseFloat(st).toFixed(2);
     window.applyScratch && window.applyScratch(null, st);
+    // bgm
+    const bgmOn  = C.bgmOn      ?? true;
+    const bgmVol = C.bgmVolume  ?? 0.5;
+    const bgmCf  = C.bgmCrossfade ?? 3.0;
+    document.getElementById('bgm-on').checked           = bgmOn;
+    document.getElementById('bgm-vol').value            = bgmVol;
+    document.getElementById('bgm-vol-val').textContent  = parseFloat(bgmVol).toFixed(2);
+    document.getElementById('bgm-cf').value             = bgmCf;
+    document.getElementById('bgm-cf-val').textContent   = parseFloat(bgmCf).toFixed(1) + 's';
+    window.BGM && window.BGM.setEnabled(bgmOn);
+    window.BGM && window.BGM.setVolume(bgmVol);
+    window.BGM && (window.BGM.crossfade = bgmCf);
   }
 
   function getConfig() {
@@ -1537,6 +1562,9 @@ void main(){
       fogOctaves:   parseFloat(document.getElementById('fog-oct').value),
       fogThrottle:  document.getElementById('fog-throttle').checked,
       scratchTex:      parseFloat(document.getElementById('scratch-tex').value),
+      bgmOn:        document.getElementById('bgm-on').checked,
+      bgmVolume:    parseFloat(document.getElementById('bgm-vol').value),
+      bgmCrossfade: parseFloat(document.getElementById('bgm-cf').value),
       whispOn:       document.getElementById('whisp-on').checked,
       whispColor:    document.getElementById('whisp-color').value,
       whispPoolSize: parseFloat(document.getElementById('whisp-pool').value),
@@ -1705,6 +1733,21 @@ void main(){
     window.applyScratch && window.applyScratch(null, parseFloat(e.target.value));
   });
 
+  // bgm controls
+  document.getElementById('bgm-on').addEventListener('change', e => {
+    window.BGM && window.BGM.setEnabled(e.target.checked);
+  });
+  document.getElementById('bgm-vol').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    document.getElementById('bgm-vol-val').textContent = v.toFixed(2);
+    window.BGM && window.BGM.setVolume(v);
+  });
+  document.getElementById('bgm-cf').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    document.getElementById('bgm-cf-val').textContent = v.toFixed(1) + 's';
+    if(window.BGM) window.BGM.crossfade = v;
+  });
+
   document.getElementById('dev-reset').addEventListener('click', () => {
     dynStyle().textContent = '';
     applyConfig(DEFAULTS);
@@ -1864,6 +1907,184 @@ void main(){
     });
     document.getElementById('dev-load').addEventListener('click', () => fileInput.click());
   }
+})();
+</script>
+
+<!-- ── BGM MUTE BUTTON ──────────────────────────────────── -->
+<style>
+#bgm-mute {
+  position: fixed;
+  bottom: 18px;
+  right: 80px; /* sits left of the DEV button */
+  z-index: 9999;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(212,180,131,0.25);
+  background: rgba(10,6,2,0.72);
+  backdrop-filter: blur(6px);
+  color: rgba(212,180,131,0.65);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .2s, color .2s, background .2s;
+  line-height: 1;
+  padding: 0;
+}
+#bgm-mute:hover {
+  border-color: rgba(212,180,131,0.6);
+  color: rgba(212,180,131,1);
+  background: rgba(20,12,4,0.88);
+}
+#bgm-mute.muted {
+  color: rgba(212,180,131,0.28);
+  border-color: rgba(212,180,131,0.12);
+}
+</style>
+<button id="bgm-mute" title="Toggle music" aria-label="Toggle music">♪</button>
+
+<script>
+/* ── BGM — Web Audio cross-fade looper ───────────────────── */
+(function(){
+  let ctx = null, buf = null;
+  let gainNode = null;        // master gain (volume)
+  let srcA = null, srcB = null;
+  let loopStart = 0;          // WebAudio clock time when current loop started
+  let schedTimer = null;
+  let started = false;
+  let muted = false;
+  const FILE = 'bgm.mp3';
+
+  window.BGM = {
+    enabled:   true,
+    volume:    0.5,
+    crossfade: 3.0,           // seconds
+    setEnabled(v) {
+      this.enabled = v;
+      if(!v) { stop(); } else { startIfReady(); }
+      document.getElementById('bgm-mute').classList.toggle('muted', !v || muted);
+    },
+    setVolume(v) {
+      this.volume = v;
+      if(gainNode && ctx) {
+        gainNode.gain.setTargetAtTime(muted ? 0 : v, ctx.currentTime, 0.05);
+      }
+    },
+  };
+
+  // ── AudioContext + buffer ──────────────────────────────────
+  async function init() {
+    if(ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = ctx.createGain();
+    gainNode.gain.value = window.BGM.volume;
+    gainNode.connect(ctx.destination);
+
+    try {
+      const res = await fetch(FILE);
+      const ab  = await res.arrayBuffer();
+      buf = await ctx.decodeAudioData(ab);
+    } catch(e) {
+      console.warn('[BGM] failed to load', FILE, e);
+      return;
+    }
+    startIfReady();
+  }
+
+  function startIfReady() {
+    if(!buf || !ctx || !window.BGM.enabled || started) return;
+    started = true;
+    scheduleNext(ctx.currentTime, 0);
+  }
+
+  // ── cross-fade scheduler ───────────────────────────────────
+  // Starts a new buffer source at `when` (WebAudio clock), offset into buffer at `offset`.
+  // crossfadeTime before its natural end, schedules the next source.
+  function scheduleNext(when, offset) {
+    if(!buf || !window.BGM.enabled) return;
+
+    const cf       = Math.min(window.BGM.crossfade, buf.duration * 0.45);
+    const duration = buf.duration - offset;  // how long this source will play before we need the next
+    const switchAt = when + duration - cf;   // when to start next source
+    const msUntil  = (switchAt - ctx.currentTime) * 1000 - 80; // wake up 80ms early
+
+    // fade in new source
+    const src  = ctx.createBufferSource();
+    const fade = ctx.createGain();
+    src.buffer = buf;
+    src.connect(fade);
+    fade.connect(gainNode);
+
+    const isFresh = (offset === 0 && !srcA);
+    if(isFresh) {
+      // very first play: just start at current volume (no fade-in)
+      fade.gain.value = 1;
+    } else {
+      // cross-fade: ramp in over cf seconds
+      fade.gain.setValueAtTime(0, when);
+      fade.gain.linearRampToValueAtTime(1, when + cf);
+    }
+
+    src.start(when, offset);
+    loopStart = when;
+
+    // fade out and stop the previous source at `when`
+    if(srcA) {
+      const old = srcA;
+      const oldGain = srcA._fadeGain;
+      if(oldGain) {
+        oldGain.gain.setValueAtTime(1, when);
+        oldGain.gain.linearRampToValueAtTime(0, when + cf);
+      }
+      setTimeout(() => { try { old.stop(); } catch(e) {} }, (when - ctx.currentTime + cf + 0.1) * 1000);
+    }
+
+    src._fadeGain = fade;
+    srcA = src;
+
+    // schedule wake-up to queue the next iteration
+    clearTimeout(schedTimer);
+    if(msUntil > 0) {
+      schedTimer = setTimeout(() => scheduleNext(switchAt, 0), msUntil);
+    } else {
+      scheduleNext(switchAt, 0);
+    }
+  }
+
+  function stop() {
+    started = false;
+    clearTimeout(schedTimer);
+    [srcA, srcB].forEach(s => { if(s) try { s.stop(); } catch(e) {} });
+    srcA = srcB = null;
+  }
+
+  // ── autoplay on first user gesture ─────────────────────────
+  function onFirstGesture() {
+    document.removeEventListener('click',     onFirstGesture, true);
+    document.removeEventListener('keydown',   onFirstGesture, true);
+    document.removeEventListener('touchstart',onFirstGesture, true);
+    init();
+  }
+  document.addEventListener('click',     onFirstGesture, true);
+  document.addEventListener('keydown',   onFirstGesture, true);
+  document.addEventListener('touchstart',onFirstGesture, true);
+
+  // ── mute button ────────────────────────────────────────────
+  document.getElementById('bgm-mute').addEventListener('click', () => {
+    if(!window.BGM.enabled) {
+      // dev panel disabled BGM entirely — mute button just toggles enable
+      window.BGM.setEnabled(true);
+      document.getElementById('bgm-on') && (document.getElementById('bgm-on').checked = true);
+      return;
+    }
+    muted = !muted;
+    if(ctx) {
+      gainNode.gain.setTargetAtTime(muted ? 0 : window.BGM.volume, ctx.currentTime, 0.15);
+    }
+    document.getElementById('bgm-mute').classList.toggle('muted', muted);
+  });
 })();
 </script>
 
