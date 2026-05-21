@@ -98,10 +98,19 @@
     .hero-bg {
       position: absolute;
       inset: 0;
+      background-image: var(--hbg-img, url('Screenshot_4.png'));
+      background-size: cover;
+      background-position: var(--hbg-pos, 50% 50%);
+      background-repeat: no-repeat;
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: var(--hbg-ov, 1);
       background:
         linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.22) 35%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.97) 100%),
-        linear-gradient(90deg, rgba(0,0,0,0.5) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.5) 100%),
-        url('Screenshot_4.png') center/cover no-repeat;
+        linear-gradient(90deg, rgba(0,0,0,0.5) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.5) 100%);
     }
 
     .hero-vignette {
@@ -1013,6 +1022,7 @@
     <div id="word-toggles" style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px"></div>
 
     <div class="dev-section">Scratch</div>
+    <label class="dev-check"><span>Enable</span><input type="checkbox" id="scratch-on" checked></label>
     <div class="dev-row"><span>Grain opacity</span><span id="scratch-tex-val">0.25</span></div>
     <input class="dev-slider" type="range" id="scratch-tex" min="0" max="1" step="0.05" value="0.25">
   </div>
@@ -1169,6 +1179,27 @@
 
   <!-- ── LAYOUT TAB ── -->
   <div class="dev-pane" id="tab-layout">
+
+    <div class="dev-section">Hero Image</div>
+    <div class="dev-row" style="gap:4px">
+      <input type="text" id="hbg-url" placeholder="image URL or filename" value="Screenshot_4.png"
+        style="flex:1;background:#0a0602;color:rgba(212,180,131,0.85);border:1px solid rgba(212,180,131,0.2);border-radius:2px;padding:4px 6px;font-size:11px;min-width:0">
+      <button id="hbg-url-set"
+        style="background:none;border:1px solid rgba(212,180,131,0.25);color:rgba(212,180,131,0.7);border-radius:2px;padding:3px 7px;font-size:11px;cursor:pointer;white-space:nowrap">Set</button>
+    </div>
+    <button id="hbg-file-btn"
+      style="width:100%;margin-top:5px;margin-bottom:10px;background:none;border:1px solid rgba(212,180,131,0.2);color:rgba(212,180,131,0.55);border-radius:2px;padding:5px;font-size:11px;cursor:pointer">
+      Load local file…
+    </button>
+    <input type="file" id="hbg-file" accept="image/*" style="display:none">
+
+    <div class="dev-row"><span>Position X</span><span id="hbg-x-val">50%</span></div>
+    <input class="dev-slider" type="range" id="hbg-x" min="0" max="100" step="1" value="50">
+    <div class="dev-row"><span>Position Y</span><span id="hbg-y-val">50%</span></div>
+    <input class="dev-slider" type="range" id="hbg-y" min="0" max="100" step="1" value="50">
+    <div class="dev-row"><span>Overlay darkness</span><span id="hbg-ov-val">1.00</span></div>
+    <input class="dev-slider" type="range" id="hbg-ov" min="0" max="1" step="0.05" value="1">
+
     <div class="dev-section">Trailer</div>
     <div class="dev-row"><span>Frame width (px)</span><span id="trailer-w-val">1000</span></div>
     <input class="dev-slider" type="range" id="trailer-w" min="400" max="1400" step="20" value="1000">
@@ -1474,7 +1505,7 @@ void main(){
 
 <script>
 (function(){
-  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, trailerW:1000, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+  const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchOn:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1691,14 +1722,29 @@ void main(){
       W.edgePad      = C.whispEdgePad ?? 48;   W.edges        = we.slice();
     }
     // scratch
-    const st = C.scratchTex ?? 0.25;
+    const sOn = C.scratchOn ?? true;
+    const st  = C.scratchTex ?? 0.25;
+    document.getElementById('scratch-on').checked           = sOn;
     document.getElementById('scratch-tex').value            = st;
     document.getElementById('scratch-tex-val').textContent  = parseFloat(st).toFixed(2);
-    window.applyScratch && window.applyScratch(null, st);
+    document.getElementById('scratch-tex').disabled         = !sOn;
+    window.applyScratch && window.applyScratch(null, sOn ? st : 0);
     // layout
-    { const tw = C.trailerW ?? 1000;
+    { const r = document.documentElement;
+      const url = C.heroBgUrl ?? 'Screenshot_4.png';
+      const x   = C.heroBgX  ?? 50;
+      const y   = C.heroBgY  ?? 50;
+      const ov  = C.heroBgOv ?? 1.0;
+      document.getElementById('hbg-url').value      = url;
+      wv('hbg-x', x); wt('hbg-x-val', x + '%');
+      wv('hbg-y', y); wt('hbg-y-val', y + '%');
+      wv('hbg-ov', ov); wt('hbg-ov-val', parseFloat(ov).toFixed(2));
+      r.style.setProperty('--hbg-img', `url('${url}')`);
+      r.style.setProperty('--hbg-pos', `${x}% ${y}%`);
+      r.style.setProperty('--hbg-ov', ov);
+      const tw = C.trailerW ?? 1000;
       wv('trailer-w', tw); wt('trailer-w-val', tw);
-      document.documentElement.style.setProperty('--trailer-w', tw + 'px');
+      r.style.setProperty('--trailer-w', tw + 'px');
     }
     // bgm
     const bgmOn  = C.bgmOn      ?? true;
@@ -1741,7 +1787,12 @@ void main(){
       fogFlowY:     parseFloat(document.getElementById('fog-flowy').value),
       fogOctaves:   parseFloat(document.getElementById('fog-oct').value),
       fogThrottle:  document.getElementById('fog-throttle').checked,
+      scratchOn:       document.getElementById('scratch-on').checked,
       scratchTex:      parseFloat(document.getElementById('scratch-tex').value),
+      heroBgUrl:    document.getElementById('hbg-url').value,
+      heroBgX:      parseFloat(document.getElementById('hbg-x').value),
+      heroBgY:      parseFloat(document.getElementById('hbg-y').value),
+      heroBgOv:     parseFloat(document.getElementById('hbg-ov').value),
       trailerW:     parseFloat(document.getElementById('trailer-w').value),
       bgmOn:        document.getElementById('bgm-on').checked,
       bgmVolume:    parseFloat(document.getElementById('bgm-vol').value),
@@ -1946,12 +1997,54 @@ void main(){
   });
 
   // scratch controls
+  document.getElementById('scratch-on').addEventListener('change', e => {
+    const on  = e.target.checked;
+    const tex = parseFloat(document.getElementById('scratch-tex').value);
+    document.getElementById('scratch-tex').disabled = !on;
+    window.applyScratch && window.applyScratch(null, on ? tex : 0);
+  });
   document.getElementById('scratch-tex').addEventListener('input', e => {
     document.getElementById('scratch-tex-val').textContent = parseFloat(e.target.value).toFixed(2);
-    window.applyScratch && window.applyScratch(null, parseFloat(e.target.value));
+    if(document.getElementById('scratch-on').checked)
+      window.applyScratch && window.applyScratch(null, parseFloat(e.target.value));
   });
 
   // layout controls
+  (function(){
+    const r = document.documentElement;
+    function setPos() {
+      const x = document.getElementById('hbg-x').value;
+      const y = document.getElementById('hbg-y').value;
+      r.style.setProperty('--hbg-pos', `${x}% ${y}%`);
+    }
+    document.getElementById('hbg-x').addEventListener('input', e => {
+      document.getElementById('hbg-x-val').textContent = e.target.value + '%'; setPos();
+    });
+    document.getElementById('hbg-y').addEventListener('input', e => {
+      document.getElementById('hbg-y-val').textContent = e.target.value + '%'; setPos();
+    });
+    document.getElementById('hbg-ov').addEventListener('input', e => {
+      document.getElementById('hbg-ov-val').textContent = parseFloat(e.target.value).toFixed(2);
+      r.style.setProperty('--hbg-ov', e.target.value);
+    });
+    document.getElementById('hbg-url-set').addEventListener('click', () => {
+      const url = document.getElementById('hbg-url').value.trim();
+      if(url) r.style.setProperty('--hbg-img', `url('${url}')`);
+    });
+    document.getElementById('hbg-file-btn').addEventListener('click', () => {
+      document.getElementById('hbg-file').click();
+    });
+    document.getElementById('hbg-file').addEventListener('change', e => {
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        r.style.setProperty('--hbg-img', `url('${ev.target.result}')`);
+        document.getElementById('hbg-url').value = file.name;
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    });
+  })();
   document.getElementById('trailer-w').addEventListener('input', e => {
     document.getElementById('trailer-w-val').textContent = e.target.value;
     document.documentElement.style.setProperty('--trailer-w', e.target.value + 'px');
