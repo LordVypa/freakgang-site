@@ -39,7 +39,7 @@
   "whispAfterOn": true,
   "whispAfterBlur": 1,
   "whispAfterOp": 0.5,
-  "whispColor": "#3b3b3b",
+  "whispColor": "#414141",
   "whispColor2": "#644a20",
   "whispFont": "'Jolly Lodger', cursive",
   "whispPoolSize": 13,

@@ -2105,7 +2105,12 @@ void main(){
 
   // ── AudioContext + buffer ──────────────────────────────────
   async function init() {
-    if(ctx) return;
+    if(ctx) {
+      // context exists but was suspended (autoplay blocked) — resume now
+      if(ctx.state === 'suspended') await ctx.resume();
+      startIfReady();
+      return;
+    }
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     gainNode = ctx.createGain();
     gainNode.gain.value = window.BGM.volume;
@@ -2189,13 +2194,24 @@ void main(){
     srcA = srcB = null;
   }
 
-  // ── autoplay on first user gesture ─────────────────────────
-  function onFirstGesture() {
+  // ── autoplay: try immediately, fall back to first gesture ───
+  function removeGestureListeners() {
     document.removeEventListener('click',     onFirstGesture, true);
     document.removeEventListener('keydown',   onFirstGesture, true);
     document.removeEventListener('touchstart',onFirstGesture, true);
+  }
+  function onFirstGesture() {
+    removeGestureListeners();
     init();
   }
+  // attempt silent autoplay on load
+  (async () => {
+    await init();
+    if(ctx && ctx.state === 'running') {
+      removeGestureListeners(); // browser allowed it — no need to wait
+    }
+    // if suspended, gesture listeners below will resume it
+  })();
   document.addEventListener('click',     onFirstGesture, true);
   document.addEventListener('keydown',   onFirstGesture, true);
   document.addEventListener('touchstart',onFirstGesture, true);
