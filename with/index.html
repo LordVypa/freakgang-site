@@ -40,7 +40,11 @@
       justify-content: center;
       align-items: center;
       gap: 48px;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.92) 0%, transparent 100%);
+      background: rgba(6,3,1,var(--nav-bg-op, 0.88));
+      backdrop-filter: blur(var(--nav-blur, 14px));
+      -webkit-backdrop-filter: blur(var(--nav-blur, 14px));
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s;
     }
 
     .nav-logo {
@@ -58,7 +62,7 @@
     }
 
     .nav-links a {
-      color: rgba(224,216,200,0.6);
+      color: var(--nav-link-color, rgba(224,216,200,0.6));
       text-decoration: none;
       font-size: var(--fs-nav, 13px);
       letter-spacing: 2px;
@@ -66,7 +70,7 @@
       transition: color 0.2s;
     }
 
-    .nav-links a:hover { color: var(--gold); }
+    .nav-links a:hover { color: var(--nav-link-hover, var(--gold)); }
 
     .nav-wishlist {
       border: 1px solid rgba(212,180,131,0.4) !important;
@@ -1133,6 +1137,7 @@
     <button class="dev-tab"        data-tab="whisp">Screams</button>
     <button class="dev-tab"        data-tab="bgm">BGM</button>
     <button class="dev-tab"        data-tab="layout">Layout</button>
+    <button class="dev-tab"        data-tab="nav">Nav</button>
     <button class="dev-tab"        data-tab="type">Type</button>
   </div>
 
@@ -1328,15 +1333,34 @@
     <div class="dev-row"><span>Desc line height</span><span id="lh-desc-val">1.75</span></div>
     <input class="dev-slider" type="range" id="lh-desc" min="1" max="3" step="0.05" value="1.75">
 
-    <div class="dev-section">Nav</div>
-    <div class="dev-row"><span>Links</span><span id="fs-nav-val">13px</span></div>
-    <input class="dev-slider" type="range" id="fs-nav" min="10" max="22" step="1" value="13">
-
     <div class="dev-section">Sections</div>
     <div class="dev-row"><span>Section title</span><span id="fs-section-title-val">42px</span></div>
     <input class="dev-slider" type="range" id="fs-section-title" min="20" max="80" step="1" value="42">
     <div class="dev-row"><span>Body text</span><span id="fs-body-val">17px</span></div>
     <input class="dev-slider" type="range" id="fs-body" min="12" max="26" step="1" value="17">
+
+  </div>
+
+  <!-- ── NAV TAB ── -->
+  <div class="dev-pane" id="tab-nav">
+
+    <div class="dev-section">Panel</div>
+    <div class="dev-row"><span>Background opacity</span><span id="nav-bg-op-val">0.88</span></div>
+    <input class="dev-slider" type="range" id="nav-bg-op" min="0" max="1" step="0.02" value="0.88">
+    <div class="dev-row"><span>Blur (px)</span><span id="nav-blur-val">14</span></div>
+    <input class="dev-slider" type="range" id="nav-blur" min="0" max="40" step="1" value="14">
+    <div class="dev-row"><span>Border opacity</span><span id="nav-border-op-val">0.14</span></div>
+    <input class="dev-slider" type="range" id="nav-border-op" min="0" max="1" step="0.02" value="0.14">
+
+    <div class="dev-section">Links</div>
+    <div class="dev-row"><span>Font size</span><span id="fs-nav-val2">13px</span></div>
+    <input class="dev-slider" type="range" id="fs-nav2" min="10" max="22" step="1" value="13">
+    <div class="dev-row" style="margin-top:4px"><span>Text color</span></div>
+    <input type="color" id="nav-link-color" value="#d8d0c4"
+      style="width:100%;height:28px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px;margin-bottom:10px">
+    <div class="dev-row"><span>Hover color</span></div>
+    <input type="color" id="nav-link-hover" value="#D4B483"
+      style="width:100%;height:28px;border:1px solid rgba(212,180,131,0.2);background:none;cursor:pointer;border-radius:2px;margin-bottom:10px">
 
   </div>
 
@@ -1523,9 +1547,14 @@ void main(){
   window.addEventListener('resize', resize); resize();
 
   let scroll=0, tScroll=0;
+  const navEl = document.querySelector('nav');
   window.addEventListener('scroll', ()=>{
     const max=document.documentElement.scrollHeight-window.innerHeight;
     tScroll = max>0 ? window.scrollY/max : 0;
+    const bOp = getComputedStyle(document.documentElement).getPropertyValue('--nav-border-op').trim() || '0.14';
+    navEl.style.borderBottomColor = window.scrollY > 10
+      ? `rgba(212,180,131,${bOp})`
+      : 'transparent';
   });
 
   let lastT=0;
@@ -1674,7 +1703,7 @@ void main(){
 <script>
 (function(){
   const DEFAULTS = { amp:2.5, spd:0.8, glow:0.90, glowInv:true, breatheOn:true, breatheSpeed:4.0, breatheDepth:0.5, wordDisabled:[false,false,false,false], dustOn:true, dustCount:100, dustSpeed:1.0, dustOpacity:1.0, dustSize:1.0, dustParallax:1.0, fogOn:true, fogOpacity:0.55, fogHeight:0.40, fogSpeed:1.0, fogColor:'#1a0f04', fogScale:3.2, fogWarp:1.8, fogFlowX:1.0, fogFlowY:0.0, fogOctaves:3, fogThrottle:true, scratchOn:true, scratchTex:0.25, bgmOn:true, bgmVolume:0.5, bgmCrossfade:3.0, fsTitle:88, fsSubtitle:14, fsDesc:19, lhDesc:1.75, fsNav:13, fsSectionTitle:42, fsBody:17,
-    trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
+    navBgOp:0.88, navBlur:14, navBorderOp:0.14, navLinkColor:'#d8d0c4', navLinkHover:'#D4B483', trailerW:1000, heroBgUrl:'Screenshot_4.png', heroBgX:50, heroBgY:50, heroBgOv:1.0, heroPool:0.55, heroTshadow:1.0, whispOn:true, whispGhostOn:true, whispFlashOn:true, whispAfterOn:false, whispAfterBlur:1.5, whispAfterOp:0.40, whispColor:'#D4B483', whispColor2:'#D4B483', whispFont:"'Jolly Lodger', cursive", whispPoolSize:8, whispMinDist:160, whispGapMin:0.3, whispGapMax:1.5, whispGOpMin:0.10, whispGOpMax:0.35, whispGHoldMin:3, whispGHoldMax:8, whispGSzMin:12, whispGSzMax:20, whispFOpMin:0.45, whispFOpMax:0.75, whispFHoldMin:0.5, whispFHoldMax:2.0, whispFSzMin:16, whispFSzMax:28, whispRotMin:-6, whispRotMax:6, whispEdgePad:48, whispEdges:[true,true,true,true] };
   const baseAmp  = { a:[0.46,-0.58], b1:[-0.46,0.35], b2:[0.35,-0.35], c:[-0.35,0.58], d1:[0.23,0.35], d2:[-0.35,-0.23] };
   const wordNames = ['Whisper','in','the','Halls'];
   const wordDisabled = [false,false,false,false];
@@ -1904,7 +1933,6 @@ void main(){
         ['fs-title',        'fsTitle',        88,  'px'],
         ['fs-subtitle',     'fsSubtitle',     14,  'px'],
         ['fs-desc',         'fsDesc',         19,  'px'],
-        ['fs-nav',          'fsNav',          13,  'px'],
         ['fs-section-title','fsSectionTitle', 42,  'px'],
         ['fs-body',         'fsBody',         17,  'px'],
         ['lh-desc',         'lhDesc',         1.75, ''],
@@ -1914,6 +1942,26 @@ void main(){
         wv(id, v); wt(id + '-val', v + (unit || ''));
         r.style.setProperty('--' + id, v + (unit || ''));
       });
+    }
+    // nav visuals
+    { const r = document.documentElement;
+      const nbg  = C.navBgOp     ?? 0.88;
+      const nbl  = C.navBlur     ?? 14;
+      const nbor = C.navBorderOp ?? 0.14;
+      wv('nav-bg-op',     nbg);  wt('nav-bg-op-val',     parseFloat(nbg).toFixed(2));
+      wv('nav-blur',      nbl);  wt('nav-blur-val',       nbl);
+      wv('nav-border-op', nbor); wt('nav-border-op-val', parseFloat(nbor).toFixed(2));
+      r.style.setProperty('--nav-bg-op',     nbg);
+      r.style.setProperty('--nav-blur',      nbl + 'px');
+      r.style.setProperty('--nav-border-op', nbor);
+      const nlc  = C.navLinkColor ?? '#d8d0c4';
+      const nlh  = C.navLinkHover ?? '#D4B483';
+      const nfs  = C.fsNav        ?? 13;
+      wv('nav-link-color', nlc); wv('nav-link-hover', nlh);
+      wv('fs-nav2', nfs); wt('fs-nav-val2', nfs + 'px');
+      r.style.setProperty('--nav-link-color', nlc);
+      r.style.setProperty('--nav-link-hover', nlh);
+      r.style.setProperty('--fs-nav',         nfs + 'px');
     }
     // layout
     { const r = document.documentElement;
@@ -1985,9 +2033,14 @@ void main(){
       fsSubtitle:    parseFloat(document.getElementById('fs-subtitle').value),
       fsDesc:        parseFloat(document.getElementById('fs-desc').value),
       lhDesc:        parseFloat(document.getElementById('lh-desc').value),
-      fsNav:         parseFloat(document.getElementById('fs-nav').value),
       fsSectionTitle:parseFloat(document.getElementById('fs-section-title').value),
       fsBody:        parseFloat(document.getElementById('fs-body').value),
+      navBgOp:      parseFloat(document.getElementById('nav-bg-op').value),
+      navBlur:      parseFloat(document.getElementById('nav-blur').value),
+      navBorderOp:  parseFloat(document.getElementById('nav-border-op').value),
+      fsNav:        parseFloat(document.getElementById('fs-nav2').value),
+      navLinkColor: document.getElementById('nav-link-color').value,
+      navLinkHover: document.getElementById('nav-link-hover').value,
       heroBgUrl:    document.getElementById('hbg-url').value,
       heroBgX:      parseFloat(document.getElementById('hbg-x').value),
       heroBgY:      parseFloat(document.getElementById('hbg-y').value),
@@ -2213,7 +2266,7 @@ void main(){
   // type size controls
   (function(){
     const r = document.documentElement;
-    const fsIds = ['fs-title','fs-subtitle','fs-desc','fs-nav','fs-section-title','fs-body'];
+    const fsIds = ['fs-title','fs-subtitle','fs-desc','fs-section-title','fs-body'];
     // line-height (unitless)
     document.getElementById('lh-desc').addEventListener('input', e => {
       document.getElementById('lh-desc-val').textContent = parseFloat(e.target.value).toFixed(2);
@@ -2224,6 +2277,36 @@ void main(){
         document.getElementById(id + '-val').textContent = e.target.value + 'px';
         r.style.setProperty('--' + id, e.target.value + 'px');
       });
+    });
+  })();
+
+  // nav controls
+  (function(){
+    const r = document.documentElement;
+    const nav = document.querySelector('nav');
+    document.getElementById('fs-nav2').addEventListener('input', e => {
+      document.getElementById('fs-nav-val2').textContent = e.target.value + 'px';
+      r.style.setProperty('--fs-nav', e.target.value + 'px');
+    });
+    document.getElementById('nav-link-color').addEventListener('input', e => {
+      r.style.setProperty('--nav-link-color', e.target.value);
+    });
+    document.getElementById('nav-link-hover').addEventListener('input', e => {
+      r.style.setProperty('--nav-link-hover', e.target.value);
+    });
+    document.getElementById('nav-bg-op').addEventListener('input', e => {
+      document.getElementById('nav-bg-op-val').textContent = parseFloat(e.target.value).toFixed(2);
+      r.style.setProperty('--nav-bg-op', e.target.value);
+    });
+    document.getElementById('nav-blur').addEventListener('input', e => {
+      document.getElementById('nav-blur-val').textContent = e.target.value;
+      r.style.setProperty('--nav-blur', e.target.value + 'px');
+    });
+    document.getElementById('nav-border-op').addEventListener('input', e => {
+      const v = parseFloat(e.target.value).toFixed(2);
+      document.getElementById('nav-border-op-val').textContent = v;
+      r.style.setProperty('--nav-border-op', e.target.value);
+      if(window.scrollY > 10) nav.style.borderBottomColor = `rgba(212,180,131,${e.target.value})`;
     });
   })();
 
