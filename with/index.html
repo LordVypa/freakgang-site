@@ -1570,11 +1570,7 @@ void main(){
   // merge obj into DEFAULTS so stale/partial configs always have all keys
   function mergeWithDefaults(c) { return Object.assign({}, DEFAULTS, c, { wordDisabled: (c.wordDisabled || DEFAULTS.wordDisabled).slice(), whispEdges: (c.whispEdges || DEFAULTS.whispEdges).slice() }); }
 
-  // initial load: fetch (http) → localStorage merged with DEFAULTS (file://) → DEFAULTS
-  fetch('config.json?t=' + Date.now(), {cache:'no-store'})
-    .then(r => r.json())
-    .then(c => { const merged = mergeWithDefaults(c); lsSet(merged); applyConfig(merged); })
-    .catch(() => { const ls = lsGet(); applyConfig(ls ? mergeWithDefaults(ls) : DEFAULTS); });
+  // startup load deferred — runs after FSA/IDB helpers are defined below
 
   // live controls
   document.getElementById('amp-slider').addEventListener('input', e => {
@@ -1764,6 +1760,39 @@ void main(){
     return handle;
   }
 
+  // ── startup config load ──────────────────────────────────
+  // Priority: fetch (http/GitHub Pages) → stored FSA handle (file:// Chrome, no picker)
+  //           → localStorage → DEFAULTS
+  (async function startupLoad() {
+    // 1. fetch — works on any HTTP server and GitHub Pages
+    try {
+      const r = await fetch('config.json?t=' + Date.now(), {cache:'no-store'});
+      if(r.ok) {
+        const c = mergeWithDefaults(await r.json());
+        lsSet(c); applyConfig(c); return;
+      }
+    } catch(e) {}
+
+    // 2. Stored FSA handle — works on file:// in Chrome if user linked the file before
+    //    Uses queryPermission only (no picker, no user gesture required)
+    if(FSA) {
+      try {
+        const handle = await idbGet(IDB_KEY);
+        if(handle && (await handle.queryPermission({mode:'read'})) === 'granted') {
+          const c = mergeWithDefaults(JSON.parse(await (await handle.getFile()).text()));
+          lsSet(c); applyConfig(c); return;
+        }
+      } catch(e) {}
+    }
+
+    // 3. localStorage cache (e.g. Firefox after a previous save)
+    const ls = lsGet();
+    if(ls) { applyConfig(mergeWithDefaults(ls)); return; }
+
+    // 4. Hardcoded DEFAULTS
+    applyConfig(DEFAULTS);
+  })();
+
   function flashSaved() {
     const btn = document.getElementById('dev-save');
     btn.textContent = '✓ Saved';
@@ -1778,7 +1807,7 @@ void main(){
   // ── dev panel toggle ──
   document.getElementById('dev-toggle').addEventListener('click', async () => {
     const p = document.getElementById('dev-panel');
-    const opening = p.style.display === 'none';
+    const opening = p.style.display !== 'block';
     p.style.display = opening ? 'block' : 'none';
     if(!opening) return;
 
