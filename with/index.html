@@ -117,7 +117,7 @@
     .hero-bg {
       position: absolute;
       inset: 0;
-      background-image: var(--hbg-img, url('Screenshot_4.png'));
+      background-image: var(--hbg-img, url('shot_2.jpg'));
       background-size: cover;
       background-position: var(--hbg-pos, 50% 50%);
       background-repeat: no-repeat;
@@ -954,7 +954,7 @@
       <div class="about-text"></div>
     </div>
     <div class="about-visual">
-      <img src="Screenshot_11.png" style="width:100%;height:100%;object-fit:cover;">
+      <img src="shot_5.jpg" style="width:100%;height:100%;object-fit:cover;">
     </div>
   </div>
 </section>
@@ -970,12 +970,12 @@
     <h2 class="section-title">A Glimpse Inside</h2>
   </div>
   <div class="gallery-grid">
-    <div class="gallery-item"><img src="Screenshot_4.png"></div>
-    <div class="gallery-item"><img src="Screenshot_1.png"></div>
-    <div class="gallery-item"><img src="Screenshot_7.png"></div>
-    <div class="gallery-item"><img src="Screenshot_8.png"></div>
-    <div class="gallery-item"><img src="Screenshot_11.png"></div>
-    <div class="gallery-item"><img src="Screenshot_4.png"></div>
+    <div class="gallery-item"><img src="shot_1.jpg"></div>
+    <div class="gallery-item"><img src="shot_2.jpg"></div>
+    <div class="gallery-item"><img src="shot_3.jpg"></div>
+    <div class="gallery-item"><img src="shot_4.jpg"></div>
+    <div class="gallery-item"><img src="shot_5.jpg"></div>
+    <div class="gallery-item"><img src="shot_6.png"></div>
   </div>
 </div>
 
@@ -1625,7 +1625,7 @@
 
     <div class="dev-section">Hero Image</div>
     <div class="dev-row" style="gap:4px">
-      <input type="text" id="hbg-url" placeholder="image URL or filename" value="Screenshot_4.png"
+      <input type="text" id="hbg-url" placeholder="image URL or filename" value="shot_2.jpg"
         style="flex:1;background:#0a0602;color:rgba(212,180,131,0.85);border:1px solid rgba(212,180,131,0.2);border-radius:2px;padding:4px 6px;font-size:11px;min-width:0">
       <button id="hbg-url-set"
         style="background:none;border:1px solid rgba(212,180,131,0.25);color:rgba(212,180,131,0.7);border-radius:2px;padding:3px 7px;font-size:11px;cursor:pointer;white-space:nowrap">Set</button>
@@ -2291,7 +2291,7 @@ void main(){
     }
     // layout
     { const r = document.documentElement;
-      const url = C.heroBgUrl ?? 'Screenshot_4.png';
+      const url = C.heroBgUrl ?? 'shot_2.jpg';
       const x   = C.heroBgX  ?? 50;
       const y   = C.heroBgY  ?? 50;
       const ov  = C.heroBgOv ?? 1.0;
